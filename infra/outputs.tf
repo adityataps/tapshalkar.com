@@ -29,3 +29,8 @@ output "lb_ip" {
   description = "Load balancer IP — point your DNS A record here"
   value       = google_compute_global_address.default.address
 }
+
+output "wif_provider" {
+  description = "WIF provider resource name — used in GitHub Actions workflows"
+  value       = google_iam_workload_identity_pool_provider.github.name
+}
