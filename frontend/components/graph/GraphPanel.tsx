@@ -25,8 +25,8 @@ export default function GraphPanel({ activeNodeIds = [] }: Props) {
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
     fetch(`${apiUrl}/api/graph`)
-      .then((r) => r.json())
-      .then(setData)
+      .then((r) => { if (!r.ok) return null; return r.json(); })
+      .then((d) => d && setData(d))
       .catch(() => {}); // fail silently — graph stays empty
   }, []);
 
