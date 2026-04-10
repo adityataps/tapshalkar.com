@@ -44,9 +44,16 @@ resource "google_compute_url_map" "default" {
   name            = "tapshalkar-url-map"
   default_service = google_compute_backend_bucket.static.id
 
+  # Canonical subdomain — serves the site
+  host_rule {
+    hosts        = ["${var.subdomain}.${var.domain}"]
+    path_matcher = "main"
+  }
+
+  # Apex and www — redirect to canonical subdomain
   host_rule {
     hosts        = [var.domain, "www.${var.domain}"]
-    path_matcher = "main"
+    path_matcher = "redirect-to-subdomain"
   }
 
   path_matcher {
@@ -58,6 +65,17 @@ resource "google_compute_url_map" "default" {
       service = google_compute_backend_service.backend.id
     }
   }
+
+  path_matcher {
+    name = "redirect-to-subdomain"
+
+    default_url_redirect {
+      host_redirect          = "${var.subdomain}.${var.domain}"
+      https_redirect         = true
+      redirect_response_code = "MOVED_PERMANENTLY_DEFAULT"
+      strip_query            = false
+    }
+  }
 }
 
 # Managed TLS cert
@@ -65,7 +83,11 @@ resource "google_compute_managed_ssl_certificate" "default" {
   name = "tapshalkar-cert"
 
   managed {
-    domains = distinct(flatten([var.certificate_domains, var.domain, "www.${var.domain}"]))
+    domains = [
+      var.domain,
+      "www.${var.domain}",
+      "${var.subdomain}.${var.domain}",
+    ]
   }
 }
 

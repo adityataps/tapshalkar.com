@@ -41,3 +41,9 @@ variable "steam_user_id" {
   description = "Steam 64-bit user ID for the graph-gen job"
   type        = string
 }
+
+variable "subdomain" {
+  description = "Primary subdomain for the portfolio (e.g. aditya)"
+  type        = string
+  default     = "aditya"
+}
