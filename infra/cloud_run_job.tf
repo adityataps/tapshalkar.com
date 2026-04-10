@@ -55,7 +55,7 @@ resource "google_cloud_run_v2_job" "graph_gen" {
 
         env {
           name  = "STEAM_USER_ID"
-          value = var.steam_account_id
+          value = var.steam_user_id
         }
       }
     }

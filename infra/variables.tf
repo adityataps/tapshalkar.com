@@ -37,12 +37,6 @@ variable "certificate_domains" {
   default     = []
 }
 
-variable "steam_account_id" {
-  description = "ID of the Steam Account to use"
-  type        = string
-  default     = ""
-}
-
 variable "steam_user_id" {
   description = "Steam 64-bit user ID for the graph-gen job"
   type        = string
