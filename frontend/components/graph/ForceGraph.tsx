@@ -1,6 +1,6 @@
 "use client";
 
-import ForceGraph2D from "react-force-graph-2d";
+import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 import { useCallback, useRef, useState, useEffect } from "react";
 
 export interface GraphNode {
@@ -29,6 +29,7 @@ interface Props {
   data: GraphData;
   activeNodeIds?: string[];
   onNodeClick?: (node: GraphNode) => void;
+  graphRef?: React.MutableRefObject<ForceGraphMethods | undefined>;
 }
 
 const NODE_COLORS: Record<GraphNode["type"], string> = {
@@ -39,9 +40,15 @@ const NODE_COLORS: Record<GraphNode["type"], string> = {
   interest:   "#f472b6",
 };
 
-export default function ForceGraph({ data, activeNodeIds = [], onNodeClick }: Props) {
+export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, graphRef }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const settled = useRef(false);
+  const [cooldownTicks, setCooldownTicks] = useState<number | undefined>(undefined);
+
+  // Internal ref used when no graphRef is passed in from the parent
+  const internalRef = useRef<ForceGraphMethods | undefined>(undefined);
+  const resolvedRef = graphRef ?? internalRef;
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -55,9 +62,18 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick }: Pr
   }, []);
 
   const nodeColor = useCallback(
-    (node: GraphNode) => activeNodeIds.includes(node.id) ? "#ef4444" : NODE_COLORS[node.type] ?? "#888",
+    (node: GraphNode) =>
+      activeNodeIds.includes(node.id) ? "#ef4444" : NODE_COLORS[node.type] ?? "#888",
     [activeNodeIds]
   );
+
+  const handleEngineStop = useCallback(() => {
+    if (!settled.current) {
+      settled.current = true;
+      setCooldownTicks(0);
+      resolvedRef.current?.zoomToFit(400);
+    }
+  }, [resolvedRef]);
 
   const graphData = {
     nodes: data.nodes.map((n) => ({ ...n })),
@@ -68,6 +84,7 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick }: Pr
     <div ref={containerRef} className="w-full h-full">
       {dimensions.width > 0 && (
         <ForceGraph2D
+          ref={resolvedRef as React.MutableRefObject<ForceGraphMethods>}
           graphData={graphData}
           width={dimensions.width}
           height={dimensions.height}
@@ -78,6 +95,8 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick }: Pr
           linkColor={() => "#1e1e1e"}
           linkWidth={(link: object) => ((link as GraphEdge).weight ?? 1) * 1.5}
           onNodeClick={onNodeClick as ((node: object) => void) | undefined}
+          cooldownTicks={cooldownTicks}
+          onEngineStop={handleEngineStop}
         />
       )}
     </div>
