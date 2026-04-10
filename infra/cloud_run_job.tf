@@ -28,6 +28,11 @@ resource "google_cloud_run_v2_job" "graph_gen" {
           value = var.github_username
         }
 
+        env {
+          name  = "STEAM_USER_ID"
+          value = var.steam_user_id
+        }
+
         dynamic "env" {
           for_each = {
             "ANTHROPIC_API_KEY"     = "anthropic-api-key"
@@ -54,4 +59,8 @@ resource "google_cloud_run_v2_job" "graph_gen" {
   depends_on = [
     google_secret_manager_secret_iam_member.graph_gen_secrets
   ]
+
+  lifecycle {
+    ignore_changes = [template[0].template[0].containers[0].image]
+  }
 }

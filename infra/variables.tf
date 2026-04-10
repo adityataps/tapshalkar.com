@@ -30,3 +30,8 @@ variable "github_username" {
   type        = string
   default     = "adityataps"
 }
+
+variable "steam_user_id" {
+  description = "Steam 64-bit user ID for the graph-gen job"
+  type        = string
+}
