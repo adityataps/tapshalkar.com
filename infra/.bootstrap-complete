@@ -1,0 +1,4 @@
+State bucket: gs://adits-gcp-tfstate
+Project: adits-gcp
+Region: us-central1
+Created: manually via gcloud (one-time bootstrap)
