@@ -24,3 +24,8 @@ output "backend_cloud_run_url" {
   description = "Cloud Run service URL (internal)"
   value       = google_cloud_run_v2_service.backend.uri
 }
+
+output "lb_ip" {
+  description = "Load balancer IP — point your DNS A record here"
+  value       = google_compute_global_address.default.address
+}
