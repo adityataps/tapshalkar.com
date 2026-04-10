@@ -36,7 +36,11 @@ export function getAllPosts(): PostMeta[] {
 }
 
 export function getPost(slug: string): Post {
-  const raw = fs.readFileSync(path.join(CONTENT_DIR, `${slug}.md`), "utf-8");
+  const filePath = path.join(CONTENT_DIR, `${slug}.md`);
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Blog post not found: ${slug}`);
+  }
+  const raw = fs.readFileSync(filePath, "utf-8");
   const { data, content } = matter(raw);
   return {
     slug,

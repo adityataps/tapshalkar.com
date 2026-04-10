@@ -45,8 +45,13 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick }: Pr
 
   useEffect(() => {
     if (!containerRef.current) return;
-    const { width, height } = containerRef.current.getBoundingClientRect();
-    setDimensions({ width, height });
+    const el = containerRef.current;
+    const observer = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect;
+      setDimensions({ width, height });
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
   const nodeColor = useCallback(
