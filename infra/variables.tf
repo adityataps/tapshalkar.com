@@ -6,7 +6,7 @@ variable "project_id" {
 variable "region" {
   description = "GCP region for Cloud Run resources"
   type        = string
-  default     = "us-central1"
+  default     = "us-east1"
 }
 
 variable "domain" {
@@ -29,4 +29,9 @@ variable "github_username" {
   description = "GitHub username for the graph-gen job"
   type        = string
   default     = "adityataps"
+}
+
+variable "steam_user_id" {
+  description = "Steam 64-bit user ID for the graph-gen job"
+  type        = string
 }
