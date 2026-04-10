@@ -65,7 +65,7 @@ resource "google_compute_managed_ssl_certificate" "default" {
   name = "tapshalkar-cert"
 
   managed {
-    domains = [var.domain, "www.${var.domain}"]
+    domains = distinct(flatten([var.certificate_domains, var.domain, "www.${var.domain}"]))
   }
 }
 

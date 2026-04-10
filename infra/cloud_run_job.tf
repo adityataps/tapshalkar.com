@@ -9,7 +9,7 @@ resource "google_cloud_run_v2_job" "graph_gen" {
       timeout = "600s"
 
       containers {
-        image = "us-docker.pkg.dev/cloudrun/container/hello"  # placeholder
+        image = "us-docker.pkg.dev/cloudrun/container/hello" # placeholder
 
         resources {
           limits = {
@@ -52,6 +52,11 @@ resource "google_cloud_run_v2_job" "graph_gen" {
             }
           }
         }
+
+        env {
+          name  = "STEAM_USER_ID"
+          value = var.steam_account_id
+        }
       }
     }
   }
@@ -60,7 +65,7 @@ resource "google_cloud_run_v2_job" "graph_gen" {
     google_secret_manager_secret_iam_member.graph_gen_secrets
   ]
 
-  lifecycle {
-    ignore_changes = [template[0].template[0].containers[0].image]
-  }
+  # lifecycle {
+  #   ignore_changes = [template[0].template[0].containers[0].image]
+  # }
 }

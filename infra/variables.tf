@@ -31,6 +31,18 @@ variable "github_username" {
   default     = "adityataps"
 }
 
+variable "certificate_domains" {
+  description = "List of domains that should be added to the certificate"
+  type        = list(string)
+  default     = []
+}
+
+variable "steam_account_id" {
+  description = "ID of the Steam Account to use"
+  type        = string
+  default     = ""
+}
+
 variable "steam_user_id" {
   description = "Steam 64-bit user ID for the graph-gen job"
   type        = string
