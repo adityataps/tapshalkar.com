@@ -7,3 +7,15 @@ output "artifact_registry_repo" {
   description = "Artifact Registry repository URL"
   value       = "${var.region}-docker.pkg.dev/${var.project_id}/tapshalkar"
 }
+
+output "backend_sa_email" {
+  value = google_service_account.backend.email
+}
+
+output "graph_gen_sa_email" {
+  value = google_service_account.graph_gen.email
+}
+
+output "github_actions_sa_email" {
+  value = google_service_account.github_actions.email
+}
