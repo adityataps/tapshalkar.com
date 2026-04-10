@@ -23,6 +23,8 @@ async def fetch_steam(api_key: str, user_id: str) -> SteamData:
                 params=params_base,
             ),
         )
+        owned_r.raise_for_status()
+        recent_r.raise_for_status()
 
     owned_games = owned_r.json()["response"].get("games", [])
     recent_games = recent_r.json()["response"].get("games", [])

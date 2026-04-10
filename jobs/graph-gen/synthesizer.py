@@ -58,6 +58,10 @@ Rules:
 """
 
 
+NODE_FIELDS = {"id", "type", "label", "description", "metadata"}
+EDGE_FIELDS = {"source", "target", "type", "weight"}
+
+
 async def synthesize_graph(
     github: GitHubData,
     spotify: SpotifyData,
@@ -98,7 +102,7 @@ async def synthesize_graph(
     tool_use = next(block for block in message.content if block.type == "tool_use")
     raw = tool_use.input
 
-    nodes = [Node(**n) for n in raw["nodes"]]
-    edges = [Edge(**{**e, "weight": e.get("weight", 1.0)}) for e in raw["edges"]]
+    nodes = [Node(**{k: v for k, v in n.items() if k in NODE_FIELDS}) for n in raw["nodes"]]
+    edges = [Edge(**{**{k: v for k, v in e.items() if k in EDGE_FIELDS}, "weight": e.get("weight", 1.0)}) for e in raw["edges"]]
 
     return GraphOutput(nodes=nodes, edges=edges)

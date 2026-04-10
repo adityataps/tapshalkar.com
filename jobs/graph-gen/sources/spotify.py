@@ -40,6 +40,9 @@ async def fetch_spotify(client_id: str, client_secret: str, refresh_token: str) 
             client.get("https://api.spotify.com/v1/me/top/tracks", headers=headers, params={"limit": 10, "time_range": "medium_term"}),
             client.get("https://api.spotify.com/v1/me/player/recently-played", headers=headers, params={"limit": 10}),
         )
+        artists_r.raise_for_status()
+        tracks_r.raise_for_status()
+        recent_r.raise_for_status()
 
     top_artists = [a["name"] for a in artists_r.json()["items"]]
     top_tracks = [t["name"] for t in tracks_r.json()["items"]]
