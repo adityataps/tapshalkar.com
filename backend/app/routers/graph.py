@@ -12,10 +12,13 @@ router = APIRouter()
 async def get_graph() -> JSONResponse:
     try:
         data = await core.gcs.fetch_object(settings.gcs_bucket, "graph.json")
+        payload = json.loads(data)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=502, detail="Graph data malformed")
     except Exception:
         raise HTTPException(status_code=502, detail="Graph data unavailable")
 
     return JSONResponse(
-        content=json.loads(data),
+        content=payload,
         headers={"Cache-Control": "public, max-age=300"},
     )
