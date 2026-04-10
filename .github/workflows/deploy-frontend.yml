@@ -1,0 +1,56 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - ".github/workflows/deploy-frontend.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          # Empty string → relative URLs (/api/graph). CDN routes /api/* to Cloud Run.
+          NEXT_PUBLIC_API_URL: ""
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.WIF_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to GCS
+        run: |
+          gsutil -m rsync -r -d out/ gs://${{ vars.GCS_BUCKET }}/
+
+      - name: Invalidate CDN cache
+        run: |
+          gcloud compute url-maps invalidate-cdn-cache ${{ vars.CDN_URL_MAP }} \
+            --path "/*" \
+            --async \
+            --global
