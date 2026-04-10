@@ -20,7 +20,7 @@ Configure these in **GitHub → Settings → Secrets and variables → Actions**
 | Secret | Value |
 |---|---|
 | `ANTHROPIC_API_KEY` | Anthropic API key |
-| `GITHUB_TOKEN` | Auto-provided by GitHub Actions |
+| `GITHUB_TOKEN` | Personal Access Token (PAT) with `public_repo` scope — needed by the graph-gen job to read repository data. NOT the auto-provided `GITHUB_TOKEN` from Actions. |
 | `SPOTIFY_CLIENT_ID` | Spotify app client ID |
 | `SPOTIFY_CLIENT_SECRET` | Spotify app client secret |
 | `SPOTIFY_REFRESH_TOKEN` | Spotify refresh token |

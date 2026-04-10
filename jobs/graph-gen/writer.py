@@ -14,9 +14,8 @@ def _sync_upload(bucket_name: str, uploads: dict[str, str]) -> None:
     gcs_bucket = client.bucket(bucket_name)
     for key, content in uploads.items():
         blob = gcs_bucket.blob(key)
-        blob.upload_from_string(content, content_type="application/json")
         blob.cache_control = "public, max-age=300"
-        blob.patch()
+        blob.upload_from_string(content, content_type="application/json")
 
 
 async def write_outputs(

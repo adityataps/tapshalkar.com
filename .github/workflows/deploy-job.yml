@@ -38,6 +38,9 @@ jobs:
           docker push ${{ vars.JOB_IMAGE }}:latest
 
       - name: Update Cloud Run Job image
+        # Env vars and secrets are provisioned by Terraform (infra/) and persist across
+        # image updates. This step only updates the container image — no --update-env-vars
+        # needed here.
         run: |
           gcloud run jobs update graph-gen \
             --image ${{ vars.JOB_IMAGE }}:${{ github.sha }} \
