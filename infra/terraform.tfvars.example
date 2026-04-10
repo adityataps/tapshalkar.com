@@ -1,0 +1,6 @@
+project_id         = "your-gcp-project-id"
+region             = "us-central1"
+domain             = "tapshalkar.com"
+github_repo        = "adityataps/tapshalkar.com"
+github_username    = "adityataps"
+graph_gen_schedule = "0 6 * * *"
