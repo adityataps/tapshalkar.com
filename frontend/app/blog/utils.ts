@@ -17,6 +17,7 @@ export interface Post extends PostMeta {
 }
 
 export function getAllPosts(): PostMeta[] {
+  if (!fs.existsSync(CONTENT_DIR)) return [];
   const files = fs.readdirSync(CONTENT_DIR).filter((f) => f.endsWith(".md"));
   return files
     .map((file) => {
