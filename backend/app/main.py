@@ -8,7 +8,8 @@ app = FastAPI(title="tapshalkar-backend", docs_url=None, redoc_url=None)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.allowed_origin, "http://localhost:3000"],
+    allow_origin_regex=settings.allowed_origin_pattern,
+    allow_origins=["http://localhost:3000"],
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
