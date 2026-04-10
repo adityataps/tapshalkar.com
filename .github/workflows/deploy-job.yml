@@ -1,0 +1,49 @@
+name: Deploy Graph-Gen Job
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "jobs/graph-gen/**"
+      - ".github/workflows/deploy-job.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.WIF_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ vars.GCP_REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and push image
+        run: |
+          IMAGE=${{ vars.JOB_IMAGE }}:${{ github.sha }}
+          docker build -t $IMAGE jobs/graph-gen/
+          docker push $IMAGE
+          docker tag $IMAGE ${{ vars.JOB_IMAGE }}:latest
+          docker push ${{ vars.JOB_IMAGE }}:latest
+
+      - name: Update Cloud Run Job image
+        # Env vars and secrets are provisioned by Terraform (infra/) and persist across
+        # image updates. This step only updates the container image — no --update-env-vars
+        # needed here.
+        run: |
+          gcloud run jobs update graph-gen \
+            --image ${{ vars.JOB_IMAGE }}:${{ github.sha }} \
+            --region ${{ vars.GCP_REGION }} \
+            --project ${{ vars.GCP_PROJECT_ID }} \
+            --quiet
