@@ -16,25 +16,11 @@ resource "google_service_account" "github_actions" {
   display_name = "GitHub Actions Service Account"
 }
 
-# Backend SA: read Secret Manager secrets
-resource "google_project_iam_member" "backend_secret_accessor" {
-  project = var.project_id
-  role    = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${google_service_account.backend.email}"
-}
-
 # Backend SA: read GCS objects
 resource "google_project_iam_member" "backend_gcs_reader" {
   project = var.project_id
   role    = "roles/storage.objectViewer"
   member  = "serviceAccount:${google_service_account.backend.email}"
-}
-
-# Graph-gen SA: read secrets
-resource "google_project_iam_member" "graph_gen_secret_accessor" {
-  project = var.project_id
-  role    = "roles/secretmanager.secretAccessor"
-  member  = "serviceAccount:${google_service_account.graph_gen.email}"
 }
 
 # Graph-gen SA: write GCS objects
