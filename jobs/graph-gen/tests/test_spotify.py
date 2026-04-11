@@ -8,14 +8,28 @@ TOKEN_RESPONSE = {"access_token": "test-access-token", "token_type": "Bearer"}
 
 TOP_ARTISTS_RESPONSE = {
     "items": [
-        {"name": "Kendrick Lamar", "genres": ["hip hop", "rap"], "id": "ka123"},
-        {"name": "Radiohead", "genres": ["alt rock", "art rock"], "id": "rh456"},
+        {
+            "name": "Kendrick Lamar",
+            "genres": ["hip hop", "rap"],
+            "id": "ka123",
+            "external_urls": {"spotify": "https://open.spotify.com/artist/2YZyLoL8N0Wb9xBt1NhZWg"},
+        },
+        {
+            "name": "Radiohead",
+            "genres": ["alt rock", "art rock"],
+            "id": "rh456",
+            "external_urls": {"spotify": "https://open.spotify.com/artist/4Z8W4fKeB5YxbusRsdQVPb"},
+        },
     ]
 }
 
 TOP_TRACKS_RESPONSE = {
     "items": [
-        {"name": "HUMBLE.", "artists": [{"name": "Kendrick Lamar"}]},
+        {
+            "name": "HUMBLE.",
+            "artists": [{"name": "Kendrick Lamar"}],
+            "external_urls": {"spotify": "https://open.spotify.com/track/7KXjTSCq5nL1LoYtL7XAwS"},
+        },
     ]
 }
 
@@ -52,6 +66,9 @@ async def test_fetch_spotify_returns_data():
         )
 
     assert isinstance(data, SpotifyData)
-    assert data.top_artists[0] == "Kendrick Lamar"
+    assert data.top_artists[0].name == "Kendrick Lamar"
+    assert data.top_artists[0].url == "https://open.spotify.com/artist/2YZyLoL8N0Wb9xBt1NhZWg"
+    assert data.top_tracks[0].name == "HUMBLE."
+    assert data.top_tracks[0].url == "https://open.spotify.com/track/7KXjTSCq5nL1LoYtL7XAwS"
     assert "hip hop" in data.top_genres
     assert len(data.recently_played) == 1

@@ -4,16 +4,24 @@ from unittest.mock import MagicMock, patch
 from synthesizer import synthesize_graph
 from models import GraphOutput
 from sources.github import GitHubData, RepoData
-from sources.spotify import SpotifyData, RecentTrack
-from sources.steam import SteamData
+from sources.spotify import SpotifyData, TopArtist, TopTrack, RecentTrack
+from sources.steam import SteamData, SteamGame
 
 
 SAMPLE_GITHUB = GitHubData(
     repos=[RepoData(name="ml-project", description="ML stuff", languages={"Python": 5000}, stars=3, url="", topics=["ml"])],
     top_languages=["Python"],
 )
-SAMPLE_SPOTIFY = SpotifyData(top_artists=["Kendrick Lamar"], top_tracks=["HUMBLE."], top_genres=["hip hop"], recently_played=[])
-SAMPLE_STEAM = SteamData(most_played=["Counter-Strike 2"], recently_played=["Counter-Strike 2"])
+SAMPLE_SPOTIFY = SpotifyData(
+    top_artists=[TopArtist(name="Kendrick Lamar", url="https://open.spotify.com/artist/2YZyLoL8N0Wb9xBt1NhZWg", genres=["hip hop"])],
+    top_tracks=[TopTrack(name="HUMBLE.", artist="Kendrick Lamar", url="https://open.spotify.com/track/7KXjTSCq5nL1LoYtL7XAwS")],
+    top_genres=["hip hop"],
+    recently_played=[],
+)
+SAMPLE_STEAM = SteamData(
+    most_played=[SteamGame(name="Counter-Strike 2", app_id=730, hours_played=70, store_url="https://store.steampowered.com/app/730")],
+    recently_played=[SteamGame(name="Counter-Strike 2", app_id=730, hours_played=70, store_url="https://store.steampowered.com/app/730")],
+)
 
 MOCK_GRAPH_JSON = {
     "nodes": [

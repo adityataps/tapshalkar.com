@@ -77,13 +77,13 @@ async def synthesize_graph(
             ],
         },
         "spotify": {
-            "top_artists": spotify.top_artists,
+            "top_artists": [a.name for a in spotify.top_artists],
             "top_genres": spotify.top_genres,
-            "top_tracks": spotify.top_tracks[:5],
+            "top_tracks": [t.name for t in spotify.top_tracks[:5]],
         },
         "steam": {
-            "most_played": steam.most_played[:5],
-            "recently_played": steam.recently_played,
+            "most_played": [g.name for g in steam.most_played[:5]],
+            "recently_played": [g.name for g in steam.recently_played],
         },
     }
 

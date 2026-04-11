@@ -35,5 +35,8 @@ async def test_fetch_steam_returns_data():
         data = await fetch_steam(api_key="test-key", user_id="76561198000000000")
 
     assert isinstance(data, SteamData)
-    assert data.most_played[0] == "Counter-Strike 2"
+    assert data.most_played[0].name == "Counter-Strike 2"
+    assert data.most_played[0].hours_played == 70  # 4200 min / 60
+    assert data.most_played[0].store_url == "https://store.steampowered.com/app/730"
     assert len(data.recently_played) == 1
+    assert data.recently_played[0].name == "Counter-Strike 2"

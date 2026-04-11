@@ -12,9 +12,23 @@ class RecentTrack:
 
 
 @dataclass
+class TopArtist:
+    name: str
+    url: str
+    genres: list[str]
+
+
+@dataclass
+class TopTrack:
+    name: str
+    artist: str
+    url: str
+
+
+@dataclass
 class SpotifyData:
-    top_artists: list[str]
-    top_tracks: list[str]
+    top_artists: list[TopArtist]
+    top_tracks: list[TopTrack]
     top_genres: list[str]
     recently_played: list[RecentTrack]
 
@@ -44,12 +58,26 @@ async def fetch_spotify(client_id: str, client_secret: str, refresh_token: str) 
         tracks_r.raise_for_status()
         recent_r.raise_for_status()
 
-    top_artists = [a["name"] for a in artists_r.json()["items"]]
-    top_tracks = [t["name"] for t in tracks_r.json()["items"]]
+    top_artists = [
+        TopArtist(
+            name=a["name"],
+            url=a["external_urls"]["spotify"],
+            genres=a.get("genres", []),
+        )
+        for a in artists_r.json()["items"]
+    ]
+    top_tracks = [
+        TopTrack(
+            name=t["name"],
+            artist=t["artists"][0]["name"],
+            url=t["external_urls"]["spotify"],
+        )
+        for t in tracks_r.json()["items"]
+    ]
 
     genre_counts: dict[str, int] = {}
-    for artist in artists_r.json()["items"]:
-        for genre in artist.get("genres", []):
+    for artist in top_artists:
+        for genre in artist.genres:
             genre_counts[genre] = genre_counts.get(genre, 0) + 1
     top_genres = sorted(genre_counts, key=lambda g: genre_counts[g], reverse=True)[:10]
 
