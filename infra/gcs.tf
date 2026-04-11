@@ -15,6 +15,16 @@ resource "google_storage_bucket" "static_site" {
     response_header = ["Content-Type", "Cache-Control"]
     max_age_seconds = 3600
   }
+
+  lifecycle_rule {
+    condition {
+      age            = 365
+      matches_prefix = ["data/ephemeral/"]
+    }
+    action {
+      type = "Delete"
+    }
+  }
 }
 
 # Allow CDN (allUsers) to read objects
