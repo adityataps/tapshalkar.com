@@ -2,18 +2,29 @@ import json
 import pytest
 from unittest.mock import MagicMock, patch
 from synthesizer import synthesize_graph
-from models import GraphOutput
+from models import GraphOutput, TraktItem, HealthSummary
 from sources.github import GitHubData, RepoData
-from sources.spotify import SpotifyData, RecentTrack
-from sources.steam import SteamData
+from sources.spotify import SpotifyData, TopArtist, TopTrack, RecentTrack
+from sources.steam import SteamData, SteamGame
+from sources.trakt import TraktData
 
 
 SAMPLE_GITHUB = GitHubData(
     repos=[RepoData(name="ml-project", description="ML stuff", languages={"Python": 5000}, stars=3, url="", topics=["ml"])],
     top_languages=["Python"],
 )
-SAMPLE_SPOTIFY = SpotifyData(top_artists=["Kendrick Lamar"], top_tracks=["HUMBLE."], top_genres=["hip hop"], recently_played=[])
-SAMPLE_STEAM = SteamData(most_played=["Counter-Strike 2"], recently_played=["Counter-Strike 2"])
+SAMPLE_SPOTIFY = SpotifyData(
+    top_artists=[TopArtist(name="Kendrick Lamar", url="https://open.spotify.com/artist/2YZyLoL8N0Wb9xBt1NhZWg", genres=["hip hop"])],
+    top_tracks=[TopTrack(name="HUMBLE.", artist="Kendrick Lamar", url="https://open.spotify.com/track/7KXjTSCq5nL1LoYtL7XAwS")],
+    top_genres=["hip hop"],
+    recently_played=[],
+)
+SAMPLE_STEAM = SteamData(
+    most_played=[SteamGame(name="Counter-Strike 2", app_id=730, hours_played=70, store_url="https://store.steampowered.com/app/730")],
+    recently_played=[SteamGame(name="Counter-Strike 2", app_id=730, hours_played=70, store_url="https://store.steampowered.com/app/730")],
+)
+SAMPLE_TRAKT = TraktData(history=[], watchlist=[], watching=None)
+SAMPLE_HEALTH = HealthSummary()
 
 MOCK_GRAPH_JSON = {
     "nodes": [
@@ -30,7 +41,9 @@ MOCK_GRAPH_JSON = {
 async def test_synthesize_returns_graph_output():
     mock_tool_use = MagicMock()
     mock_tool_use.type = "tool_use"
+    mock_tool_use.name = "emit_knowledge_graph"
     mock_tool_use.input = MOCK_GRAPH_JSON
+    mock_tool_use.id = "tool_1"
 
     mock_message = MagicMock()
     mock_message.content = [mock_tool_use]
@@ -43,6 +56,8 @@ async def test_synthesize_returns_graph_output():
             github=SAMPLE_GITHUB,
             spotify=SAMPLE_SPOTIFY,
             steam=SAMPLE_STEAM,
+            trakt=SAMPLE_TRAKT,
+            health=SAMPLE_HEALTH,
             api_key="test-key",
         )
 

@@ -7,6 +7,9 @@ locals {
     "steam-api-key",
     "github-token",
     "resend-api-key",
+    "trakt-client-id",
+    "trakt-client-secret",
+    "trakt-refresh-token",
   ]
 }
 
@@ -36,6 +39,9 @@ resource "google_secret_manager_secret_iam_member" "graph_gen_secrets" {
     "spotify-refresh-token",
     "steam-api-key",
     "github-token",
+    "trakt-client-id",
+    "trakt-client-secret",
+    "trakt-refresh-token",
   ])
   secret_id = google_secret_manager_secret.secrets[each.key].secret_id
   role      = "roles/secretmanager.secretAccessor"

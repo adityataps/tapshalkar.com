@@ -41,6 +41,9 @@ resource "google_cloud_run_v2_job" "graph_gen" {
             "SPOTIFY_REFRESH_TOKEN" = "spotify-refresh-token"
             "STEAM_API_KEY"         = "steam-api-key"
             "GITHUB_TOKEN"          = "github-token"
+            "TRAKT_CLIENT_ID"       = "trakt-client-id"
+            "TRAKT_CLIENT_SECRET"   = "trakt-client-secret"
+            "TRAKT_REFRESH_TOKEN"   = "trakt-refresh-token"
           }
           content {
             name = env.key
@@ -52,11 +55,6 @@ resource "google_cloud_run_v2_job" "graph_gen" {
             }
           }
         }
-
-        env {
-          name  = "STEAM_USER_ID"
-          value = var.steam_user_id
-        }
       }
     }
   }
@@ -65,7 +63,7 @@ resource "google_cloud_run_v2_job" "graph_gen" {
     google_secret_manager_secret_iam_member.graph_gen_secrets
   ]
 
-  # lifecycle {
-  #   ignore_changes = [template[0].template[0].containers[0].image]
-  # }
+  lifecycle {
+    ignore_changes = [template[0].template[0].containers[0].image]
+  }
 }

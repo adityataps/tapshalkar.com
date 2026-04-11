@@ -44,3 +44,23 @@ class NowSnapshot:
     listening_to: list[str]      # top 3 Spotify artists
     recently_played_games: list[str]
     updated_at: str              # ISO 8601
+
+
+@dataclass
+class TraktItem:
+    title: str
+    year: int
+    media_type: str    # "movie" or "show"
+    trakt_url: str
+    genres: list[str] = field(default_factory=list)
+    status: str = ""   # "watched" | "watching" | "watchlist"
+
+
+@dataclass
+class HealthSummary:
+    avg_daily_steps: int = 0
+    avg_active_energy_kcal: float = 0.0
+    avg_sleep_hours: float = 0.0
+    last_workout_type: str = ""
+    last_workout_duration_min: int = 0
+    data_through: str = ""   # ISO date of most recent record
