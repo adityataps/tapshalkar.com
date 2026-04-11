@@ -36,7 +36,11 @@ TOP_TRACKS_RESPONSE = {
 RECENTLY_PLAYED_RESPONSE = {
     "items": [
         {
-            "track": {"name": "Creep", "artists": [{"name": "Radiohead"}]},
+            "track": {
+                "name": "Creep",
+                "artists": [{"name": "Radiohead"}],
+                "external_urls": {"spotify": "https://open.spotify.com/track/creep123"},
+            },
             "played_at": "2026-04-09T10:00:00Z",
         }
     ]
@@ -72,3 +76,4 @@ async def test_fetch_spotify_returns_data():
     assert data.top_tracks[0].url == "https://open.spotify.com/track/7KXjTSCq5nL1LoYtL7XAwS"
     assert "hip hop" in data.top_genres
     assert len(data.recently_played) == 1
+    assert data.recently_played[0].url == "https://open.spotify.com/track/creep123"

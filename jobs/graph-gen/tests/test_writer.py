@@ -45,7 +45,7 @@ async def test_build_currently_includes_working_on():
         top_artists=[TopArtist(name="Kendrick Lamar", url="https://open.spotify.com/artist/ka", genres=["hip hop"])],
         top_tracks=[TopTrack(name="HUMBLE.", artist="Kendrick Lamar", url="https://open.spotify.com/track/hb")],
         top_genres=["hip hop"],
-        recently_played=[],
+        recently_played=[RecentTrack(name="HUMBLE.", artist="Kendrick Lamar", played_at="2026-04-09T10:00:00Z", url="https://open.spotify.com/track/hb")],
     )
     steam = SteamData(
         most_played=[SteamGame(name="Elden Ring", app_id=1245620, hours_played=47, store_url="https://store.steampowered.com/app/1245620")],
@@ -60,3 +60,4 @@ async def test_build_currently_includes_working_on():
     assert result["working_on"][0]["name"] == "tapshalkar.com"
     assert result["playing"]["name"] == "Elden Ring"
     assert result["listening_to"]["track"] == "HUMBLE."
+    assert result["listening_to"]["url"] == "https://open.spotify.com/track/hb"

@@ -23,13 +23,9 @@ def _build_activity_feed(github, spotify, steam):
             timestamp=track.played_at,
         ))
 
-    for game in steam.recently_played[:3]:
-        items.append(ActivityItem(
-            type="game",
-            title=game.name,
-            subtitle="Steam",
-            timestamp=datetime.now(timezone.utc).isoformat(),
-        ))
+    # Steam games are excluded from the activity feed: the Steam API provides
+    # no per-game timestamps (only a 2-week playtime aggregate), so we cannot
+    # reliably order them relative to Spotify tracks.
 
     items.sort(key=lambda i: i.timestamp, reverse=True)
     return ActivityFeed(items=items[:10])

@@ -9,6 +9,7 @@ class RecentTrack:
     name: str
     artist: str
     played_at: str
+    url: str = ""
 
 
 @dataclass
@@ -86,6 +87,7 @@ async def fetch_spotify(client_id: str, client_secret: str, refresh_token: str) 
             name=item["track"]["name"],
             artist=item["track"]["artists"][0]["name"],
             played_at=item["played_at"],
+            url=item["track"].get("external_urls", {}).get("spotify", ""),
         )
         for item in recent_r.json()["items"]
     ]

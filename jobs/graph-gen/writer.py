@@ -30,13 +30,7 @@ def build_currently(
     # listening_to: most recently played track
     if spotify.recently_played:
         track = spotify.recently_played[0]
-        # Match to top_tracks for URL
-        url = ""
-        for t in spotify.top_tracks:
-            if t.name == track.name:
-                url = t.url
-                break
-        result["listening_to"] = {"artist": track.artist, "track": track.name, "url": url}
+        result["listening_to"] = {"artist": track.artist, "track": track.name, "url": track.url}
     elif spotify.top_tracks:
         t = spotify.top_tracks[0]
         result["listening_to"] = {"artist": t.artist, "track": t.name, "url": t.url}
