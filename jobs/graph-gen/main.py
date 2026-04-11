@@ -6,7 +6,7 @@ from models import ActivityFeed, ActivityItem, NowSnapshot
 from sources.github import fetch_github
 from sources.spotify import fetch_spotify
 from sources.steam import fetch_steam
-from sources.trakt import fetch_trakt
+from sources.trakt import fetch_trakt, TraktData
 from sources.apple_health import fetch_apple_health
 from synthesizer import synthesize_graph
 from writer import write_outputs, build_currently
@@ -46,7 +46,7 @@ async def run():
     health_prefix = os.environ.get("APPLE_HEALTH_PREFIX", "data/ephemeral/apple-health/")
 
     print("Fetching sources in parallel...")
-    github, spotify, steam, trakt, health = await asyncio.gather(
+    github, spotify, steam, health = await asyncio.gather(
         fetch_github(username=os.environ["GITHUB_USERNAME"], token=os.environ["GITHUB_TOKEN"]),
         fetch_spotify(
             client_id=os.environ["SPOTIFY_CLIENT_ID"],
@@ -54,13 +54,20 @@ async def run():
             refresh_token=os.environ["SPOTIFY_REFRESH_TOKEN"],
         ),
         fetch_steam(api_key=os.environ["STEAM_API_KEY"], user_id=os.environ["STEAM_USER_ID"]),
-        fetch_trakt(
-            client_id=os.environ["TRAKT_CLIENT_ID"],
-            client_secret=os.environ["TRAKT_CLIENT_SECRET"],
-            refresh_token=os.environ["TRAKT_REFRESH_TOKEN"],
-        ),
         fetch_apple_health(bucket_name=bucket, prefix=health_prefix),
     )
+
+    trakt = TraktData(history=[], watchlist=[], watching=None)
+    if os.environ.get("TRAKT_CLIENT_ID"):
+        try:
+            trakt = await fetch_trakt(
+                client_id=os.environ["TRAKT_CLIENT_ID"],
+                client_secret=os.environ["TRAKT_CLIENT_SECRET"],
+                refresh_token=os.environ["TRAKT_REFRESH_TOKEN"],
+            )
+        except Exception as e:
+            print(f"Trakt fetch failed (skipping): {e}")
+
     print(f"Fetched: {len(github.repos)} repos, {len(spotify.top_artists)} artists, "
           f"{len(steam.most_played)} games, {len(trakt.history)} trakt items, "
           f"steps={health.avg_daily_steps}")
