@@ -6,8 +6,10 @@ from models import ActivityFeed, ActivityItem, NowSnapshot
 from sources.github import fetch_github
 from sources.spotify import fetch_spotify
 from sources.steam import fetch_steam
+from sources.trakt import fetch_trakt
+from sources.apple_health import fetch_apple_health
 from synthesizer import synthesize_graph
-from writer import write_outputs
+from writer import write_outputs, build_currently
 
 
 def _build_activity_feed(github, spotify, steam):
@@ -24,7 +26,7 @@ def _build_activity_feed(github, spotify, steam):
     for game in steam.recently_played[:3]:
         items.append(ActivityItem(
             type="game",
-            title=game,
+            title=game.name,
             subtitle="Steam",
             timestamp=datetime.now(timezone.utc).isoformat(),
         ))
@@ -36,8 +38,8 @@ def _build_activity_feed(github, spotify, steam):
 def _build_now(github, spotify, steam):
     return NowSnapshot(
         current_projects=[r.name for r in github.repos[:3]],
-        listening_to=spotify.top_artists[:3],
-        recently_played_games=steam.recently_played[:3],
+        listening_to=[a.name for a in spotify.top_artists[:3]],
+        recently_played_games=[g.name for g in steam.recently_played[:3]],
         updated_at=datetime.now(timezone.utc).isoformat(),
     )
 
@@ -45,9 +47,10 @@ def _build_now(github, spotify, steam):
 async def run():
     bucket = os.environ["GCS_BUCKET"]
     api_key = os.environ["ANTHROPIC_API_KEY"]
+    health_prefix = os.environ.get("APPLE_HEALTH_PREFIX", "data/ephemeral/apple-health/")
 
     print("Fetching sources in parallel...")
-    github, spotify, steam = await asyncio.gather(
+    github, spotify, steam, trakt, health = await asyncio.gather(
         fetch_github(username=os.environ["GITHUB_USERNAME"], token=os.environ["GITHUB_TOKEN"]),
         fetch_spotify(
             client_id=os.environ["SPOTIFY_CLIENT_ID"],
@@ -55,18 +58,30 @@ async def run():
             refresh_token=os.environ["SPOTIFY_REFRESH_TOKEN"],
         ),
         fetch_steam(api_key=os.environ["STEAM_API_KEY"], user_id=os.environ["STEAM_USER_ID"]),
+        fetch_trakt(
+            client_id=os.environ["TRAKT_CLIENT_ID"],
+            client_secret=os.environ["TRAKT_CLIENT_SECRET"],
+            refresh_token=os.environ["TRAKT_REFRESH_TOKEN"],
+        ),
+        fetch_apple_health(bucket_name=bucket, prefix=health_prefix),
     )
-    print(f"Fetched: {len(github.repos)} repos, {len(spotify.top_artists)} artists, {len(steam.most_played)} games")
+    print(f"Fetched: {len(github.repos)} repos, {len(spotify.top_artists)} artists, "
+          f"{len(steam.most_played)} games, {len(trakt.history)} trakt items, "
+          f"steps={health.avg_daily_steps}")
 
     print("Synthesising knowledge graph with Claude...")
-    graph = await synthesize_graph(github=github, spotify=spotify, steam=steam, api_key=api_key)
+    graph = await synthesize_graph(
+        github=github, spotify=spotify, steam=steam,
+        trakt=trakt, health=health, api_key=api_key,
+    )
     print(f"Graph: {len(graph.nodes)} nodes, {len(graph.edges)} edges")
 
     feed = _build_activity_feed(github, spotify, steam)
     now = _build_now(github, spotify, steam)
+    currently = build_currently(github, spotify, steam, trakt)
 
     print("Writing outputs to GCS...")
-    await write_outputs(bucket=bucket, graph=graph, feed=feed, now=now)
+    await write_outputs(bucket=bucket, graph=graph, feed=feed, now=now, currently=currently)
     print("Done.")
 
 
