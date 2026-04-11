@@ -1,11 +1,11 @@
 "use client";
 
 import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
-import { useCallback, useRef, useState, useEffect } from "react";
+import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 
 export interface GraphNode {
   id: string;
-  type: "skill" | "project" | "experience" | "education" | "interest";
+  type: "skill" | "project" | "experience" | "education" | "interest" | "movie" | "show" | "health";
   label: string;
   description?: string;
   metadata?: Record<string, unknown>;
@@ -38,6 +38,9 @@ const NODE_COLORS: Record<GraphNode["type"], string> = {
   experience: "#a78bfa",
   education:  "#fbbf24",
   interest:   "#f472b6",
+  movie:      "#fb923c",
+  show:       "#f87171",
+  health:     "#4ade80",
 };
 
 export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, graphRef }: Props) {
@@ -75,10 +78,16 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
     }
   }, [resolvedRef]);
 
-  const graphData = {
+  const graphData = useMemo(() => ({
     nodes: data.nodes.map((n) => ({ ...n })),
     links: data.edges.map((e) => ({ source: e.source, target: e.target, type: e.type, weight: e.weight })),
-  };
+  }), [data]);
+
+  const nodeLabel = useCallback((node: GraphNode) => {
+    const color = NODE_COLORS[node.type] ?? "#888";
+    const typeLabel = node.type.charAt(0).toUpperCase() + node.type.slice(1);
+    return `<span style="color:${color};font-weight:600">${typeLabel}</span><br/>${node.label}`;
+  }, []);
 
   return (
     <div ref={containerRef} className="w-full h-full">
@@ -89,7 +98,7 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
           width={dimensions.width}
           height={dimensions.height}
           backgroundColor="#0d0d0d"
-          nodeLabel="label"
+          nodeLabel={nodeLabel as (node: object) => string}
           nodeColor={nodeColor as (node: object) => string}
           nodeRelSize={5}
           linkColor={() => "#1e1e1e"}
