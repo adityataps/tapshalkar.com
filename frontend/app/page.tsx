@@ -12,7 +12,7 @@ export default function Home() {
         {/* Left: text */}
         <div>
           <p className="font-mono text-[#ef4444] text-xs tracking-[0.2em] uppercase mb-4">
-            ~/ml-ai-engineer
+            ~/Aditya-Tapshalkar
           </p>
           <h1 className="font-serif text-5xl font-bold text-[#f5f5f0] leading-tight mb-4">
             I build systems<br />

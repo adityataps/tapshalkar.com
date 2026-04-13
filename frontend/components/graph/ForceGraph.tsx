@@ -62,10 +62,10 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
     return () => observer.disconnect();
   }, []);
 
-  // Reset settled whenever data changes so zoomToFit fires after each new graph load.
-  useEffect(() => {
-    settled.current = false;
-  }, [data]);
+  const graphData = useMemo(() => ({
+    nodes: data.nodes.map((n) => ({ ...n })),
+    links: data.edges.map((e) => ({ source: e.source, target: e.target, type: e.type, weight: e.weight })),
+  }), [data]);
 
   const nodeColor = useCallback(
     (node: GraphNode) =>
@@ -73,18 +73,14 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
     [activeNodeIds]
   );
 
+  // Only zoom once the graph actually has nodes — skips the empty-data initial render.
   const handleEngineStop = useCallback(() => {
-    if (!settled.current) {
+    if (!settled.current && graphData.nodes.length > 0) {
       settled.current = true;
       setCooldownTicks(0);
       resolvedRef.current?.zoomToFit(400, 40);
     }
-  }, [resolvedRef]);
-
-  const graphData = useMemo(() => ({
-    nodes: data.nodes.map((n) => ({ ...n })),
-    links: data.edges.map((e) => ({ source: e.source, target: e.target, type: e.type, weight: e.weight })),
-  }), [data]);
+  }, [resolvedRef, graphData]);
 
   const nodeLabel = useCallback((node: GraphNode) => {
     const color = NODE_COLORS[node.type] ?? "#888";
@@ -106,6 +102,7 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
           nodeLabel={nodeLabel as (node: object) => string}
           nodeColor={nodeColor as (node: object) => string}
           nodeRelSize={5}
+          warmupTicks={150}
           linkColor={() => "#1e1e1e"}
           linkWidth={(link: object) => ((link as GraphEdge).weight ?? 1) * 1.5}
           onNodeClick={onNodeClick as ((node: object) => void) | undefined}
