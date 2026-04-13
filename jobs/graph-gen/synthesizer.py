@@ -178,6 +178,7 @@ async def synthesize_graph(
                 raw = tool_use.input
                 nodes = [Node(**{k: v for k, v in n.items() if k in NODE_FIELDS}) for n in raw["nodes"]]
                 edges = [Edge(**{**{k: v for k, v in e.items() if k in EDGE_FIELDS}, "weight": e.get("weight", 1.0)}) for e in raw["edges"]]
+                # Return immediately — no tool_result needed since we don't continue the loop.
                 return GraphOutput(nodes=nodes, edges=edges)
 
             elif tool_use.name == "fetch_github_readme":

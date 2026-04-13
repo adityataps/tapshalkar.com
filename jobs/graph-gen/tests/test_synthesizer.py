@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 from synthesizer import synthesize_graph
 from models import GraphOutput, TraktItem, HealthSummary
 from sources.github import GitHubData, RepoData
-from sources.spotify import SpotifyData, TopArtist, TopTrack, RecentTrack
+from sources.spotify import SpotifyData, TopArtist, TopTrack, RecentTrack, SavedShow, SavedAudiobook, RecentAlbum
 from sources.steam import SteamData, SteamGame
 from sources.trakt import TraktData
 
@@ -18,6 +18,9 @@ SAMPLE_SPOTIFY = SpotifyData(
     top_tracks=[TopTrack(name="HUMBLE.", artist="Kendrick Lamar", url="https://open.spotify.com/track/7KXjTSCq5nL1LoYtL7XAwS")],
     top_genres=["hip hop"],
     recently_played=[],
+    saved_shows=[SavedShow(name="Lex Fridman Podcast", publisher="Lex Fridman", url="https://open.spotify.com/show/lex1", description="AI and science conversations.")],
+    saved_audiobooks=[SavedAudiobook(name="Atomic Habits", author="James Clear", url="https://open.spotify.com/audiobook/ab1")],
+    recent_albums=[RecentAlbum(name="DAMN.", artist="Kendrick Lamar", url="https://open.spotify.com/album/damn1")],
 )
 SAMPLE_STEAM = SteamData(
     most_played=[SteamGame(name="Counter-Strike 2", app_id=730, hours_played=70, store_url="https://store.steampowered.com/app/730")],
