@@ -5,7 +5,7 @@ import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 
 export interface GraphNode {
   id: string;
-  type: "skill" | "project" | "experience" | "education" | "interest" | "movie" | "show" | "health";
+  type: "skill" | "project" | "experience" | "education" | "interest" | "health";
   label: string;
   description?: string;
   metadata?: Record<string, unknown>;
@@ -38,8 +38,6 @@ const NODE_COLORS: Record<GraphNode["type"], string> = {
   experience: "#a78bfa",
   education:  "#fbbf24",
   interest:   "#f472b6",
-  movie:      "#fb923c",
-  show:       "#f87171",
   health:     "#4ade80",
 };
 
@@ -85,8 +83,10 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
 
   const nodeLabel = useCallback((node: GraphNode) => {
     const color = NODE_COLORS[node.type] ?? "#888";
-    const typeLabel = node.type.charAt(0).toUpperCase() + node.type.slice(1);
-    return `<span style="color:${color};font-weight:600">${typeLabel}</span><br/>${node.label}`;
+    const subtype = node.metadata?.subtype as string | undefined;
+    const raw = subtype ?? node.type;
+    const display = raw.charAt(0).toUpperCase() + raw.slice(1);
+    return `<span style="color:${color};font-weight:600">${display}</span><br/>${node.label}`;
   }, []);
 
   return (
