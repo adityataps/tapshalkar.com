@@ -118,4 +118,4 @@ async def test_fetch_spotify_extracts_recent_albums_deduped():
     names = [a.name for a in data.recent_albums]
     assert "DAMN." in names
     assert "Pablo Honey" in names
-    assert data.recent_albums[0].url == "https://open.spotify.com/album/alb1"
+    assert sum(1 for a in data.recent_albums if a.url == "https://open.spotify.com/album/alb1") == 1

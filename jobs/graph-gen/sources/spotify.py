@@ -111,6 +111,8 @@ async def fetch_spotify(client_id: str, client_secret: str, refresh_token: str) 
             genre_counts[genre] = genre_counts.get(genre, 0) + 1
     top_genres = sorted(genre_counts, key=lambda g: genre_counts[g], reverse=True)[:10]
 
+    recent_items = recent_r.json()["items"]
+
     recently_played = [
         RecentTrack(
             name=item["track"]["name"],
@@ -118,19 +120,20 @@ async def fetch_spotify(client_id: str, client_secret: str, refresh_token: str) 
             played_at=item["played_at"],
             url=item["track"].get("external_urls", {}).get("spotify", ""),
         )
-        for item in recent_r.json()["items"]
+        for item in recent_items
     ]
 
     seen_album_ids: set[str] = set()
     recent_albums: list[RecentAlbum] = []
-    for item in recent_r.json()["items"]:
+    for item in recent_items:
         album = item["track"].get("album", {})
         album_id = album.get("id")
         if album_id and album_id not in seen_album_ids:
             seen_album_ids.add(album_id)
+            album_artists = album.get("artists", [])
             recent_albums.append(RecentAlbum(
                 name=album.get("name", ""),
-                artist=item["track"]["artists"][0]["name"],
+                artist=album_artists[0]["name"] if album_artists else item["track"]["artists"][0]["name"],
                 url=album.get("external_urls", {}).get("spotify", ""),
             ))
             if len(recent_albums) >= 10:
