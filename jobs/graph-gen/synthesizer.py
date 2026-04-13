@@ -66,34 +66,41 @@ GRAPH_TOOL = {
 
 SYSTEM_PROMPT = """You are a knowledge graph synthesizer for a software engineer's portfolio.
 
-Given data from GitHub, Spotify, Steam, Trakt, and Apple Health, emit a structured knowledge graph
-capturing their skills, projects, experience, education, and interests as typed nodes with weighted edges.
+Given data from GitHub, Spotify, Steam, Trakt, Apple Health, and a personal bio, emit a structured
+knowledge graph capturing their skills, projects, experience, education, and interests as typed nodes
+with weighted edges.
 
 You may call fetch_github_readme for up to 3 repositories to get richer project descriptions.
 Once you have enough context, call emit_knowledge_graph with the final graph.
 
 IMPORTANT: The edges array must NOT be empty. Every node must connect to at least one other node.
+IMPORTANT: Emit 60-80 nodes total. More nodes = richer graph highlighting.
 
 Node rules:
 - Node IDs: stable snake_case prefixed by type (e.g. skill-python, project-ml-tool)
-- For interest nodes use: interest-{subtype}-{slugified-name} (e.g. interest-artist-kendrick-lamar, interest-genre-hip-hop)
-- Infer skill nodes from GitHub languages and topics
+- For interest nodes use: interest-{subtype}-{slugified-name} (e.g. interest-artist-kendrick-lamar)
+- Emit granular skill nodes: individual frameworks, tools, and languages (not just "Python" — also
+  skill-fastapi, skill-nextjs, skill-pytorch, skill-terraform, etc.)
+- Infer skill nodes from GitHub languages, topics, repo names, and bio content
 - All cultural/media content uses type "interest" with metadata.subtype set to one of:
   artist, album, track, podcast, audiobook, movie, show, genre
 - Emit up to 5 artist nodes, 3 album nodes, 3 podcast nodes, 2 audiobook nodes, 3 genre nodes
-- Add movie/show nodes (as interest nodes with subtype movie/show) for Trakt history
+- Add movie/show nodes for Trakt history
 - Add a health node if Apple Health data is present
+- Emit nodes from bio content using existing types (skill, experience, education, interest);
+  set metadata.source = "bio" on these nodes
 - Always set metadata.url on every interest node where a URL is available
 - Always set metadata.subtype on every interest node
-- Prefer fewer accurate nodes over many speculative ones
+- Prefer accuracy over speculation; use bio content to enrich descriptions
 
 Edge rules (apply all that are relevant — edges array must not be empty):
 - skill → project: used_in edges for each language/skill used in a project
 - album → artist: relates_to edge (every album node must connect to its artist node)
 - genre → artist: relates_to edge (every artist node must connect to at least one genre node)
 - artist/album/genre → project: relates_to edge when music taste is relevant to a project
-- podcast/audiobook → skill: relates_to edge when the topic overlaps a skill (e.g. an ML podcast → skill-python)
-- interest → interest: relates_to edges between related interests (e.g. genre → artist, artist → album)
+- podcast/audiobook → skill: relates_to edge when the topic overlaps a skill
+- interest → interest: relates_to edges between related interests
+- bio-sourced nodes → relevant skill/project/experience nodes: relates_to edges
 - Edge weight 0.0–1.0 based on relationship strength
 """
 
@@ -119,6 +126,7 @@ async def synthesize_graph(
     trakt: TraktData,
     health: HealthSummary,
     api_key: str,
+    bio: str = "",
 ) -> GraphOutput:
     context = {
         "github": {
@@ -157,6 +165,7 @@ async def synthesize_graph(
             "avg_sleep_hours": health.avg_sleep_hours,
             "last_workout": f"{health.last_workout_type} {health.last_workout_duration_min}min" if health.last_workout_type else None,
         },
+        "bio": bio,
     }
 
     client = anthropic.Anthropic(api_key=api_key)
