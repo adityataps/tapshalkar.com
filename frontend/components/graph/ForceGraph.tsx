@@ -44,8 +44,6 @@ const NODE_COLORS: Record<GraphNode["type"], string> = {
 export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, graphRef }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const settled = useRef(false);
-  const [cooldownTicks, setCooldownTicks] = useState<number | undefined>(undefined);
 
   // Internal ref used when no graphRef is passed in from the parent
   const internalRef = useRef<ForceGraphMethods | undefined>(undefined);
@@ -73,15 +71,6 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
     [activeNodeIds]
   );
 
-  // Only zoom once the graph actually has nodes — skips the empty-data initial render.
-  const handleEngineStop = useCallback(() => {
-    if (!settled.current && graphData.nodes.length > 0) {
-      settled.current = true;
-      setCooldownTicks(0);
-      resolvedRef.current?.zoomToFit(400, 40);
-    }
-  }, [resolvedRef, graphData]);
-
   const nodeLabel = useCallback((node: GraphNode) => {
     const color = NODE_COLORS[node.type] ?? "#888";
     const subtype = node.metadata?.subtype as string | undefined;
@@ -106,8 +95,6 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
           linkColor={() => "#1e1e1e"}
           linkWidth={(link: object) => ((link as GraphEdge).weight ?? 1) * 1.5}
           onNodeClick={onNodeClick as ((node: object) => void) | undefined}
-          cooldownTicks={cooldownTicks}
-          onEngineStop={handleEngineStop}
         />
       )}
     </div>
