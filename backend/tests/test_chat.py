@@ -130,3 +130,43 @@ async def test_run_chat_stream_blocked_by_model_armor():
 
     assert len(events) == 1
     assert events[0]["type"] == "blocked"
+
+
+from unittest.mock import patch, AsyncMock
+from httpx import AsyncClient, ASGITransport
+from app.main import app
+
+
+@pytest.mark.anyio
+async def test_chat_endpoint_returns_sse_stream():
+    async def fake_stream(**kwargs):
+        async def _gen():
+            yield 'data: {"type": "text", "delta": "Hello "}\n\n'
+            yield 'data: {"type": "done", "activeNodeIds": []}\n\n'
+        return _gen()
+
+    with patch("app.routers.chat.run_chat_stream", side_effect=fake_stream):
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            response = await client.post(
+                "/api/chat",
+                json={"messages": [{"role": "user", "content": "hello"}]},
+            )
+    assert response.status_code == 200
+    assert "text/event-stream" in response.headers["content-type"]
+
+
+@pytest.mark.anyio
+async def test_chat_endpoint_rejects_empty_messages():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.post("/api/chat", json={"messages": []})
+    assert response.status_code == 422
+
+
+@pytest.mark.anyio
+async def test_chat_endpoint_rejects_oversized_message():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        response = await client.post(
+            "/api/chat",
+            json={"messages": [{"role": "user", "content": "x" * 501}]},
+        )
+    assert response.status_code == 422
