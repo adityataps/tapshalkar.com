@@ -72,7 +72,9 @@ capturing their skills, projects, experience, education, and interests as typed 
 You may call fetch_github_readme for up to 3 repositories to get richer project descriptions.
 Once you have enough context, call emit_knowledge_graph with the final graph.
 
-Rules:
+IMPORTANT: The edges array must NOT be empty. Every node must connect to at least one other node.
+
+Node rules:
 - Node IDs: stable snake_case prefixed by type (e.g. skill-python, project-ml-tool)
 - For interest nodes use: interest-{subtype}-{slugified-name} (e.g. interest-artist-kendrick-lamar, interest-genre-hip-hop)
 - Infer skill nodes from GitHub languages and topics
@@ -83,11 +85,16 @@ Rules:
 - Add a health node if Apple Health data is present
 - Always set metadata.url on every interest node where a URL is available
 - Always set metadata.subtype on every interest node
-- Connect skills to projects (used_in edges), interests to projects/skills (relates_to)
-- Use relates_to edges between albums and their artists
-- Use relates_to edges between podcasts/audiobooks and relevant skill or project nodes where a genuine connection exists
-- Edge weight 0.0–1.0 based on relationship strength
 - Prefer fewer accurate nodes over many speculative ones
+
+Edge rules (apply all that are relevant — edges array must not be empty):
+- skill → project: used_in edges for each language/skill used in a project
+- album → artist: relates_to edge (every album node must connect to its artist node)
+- genre → artist: relates_to edge (every artist node must connect to at least one genre node)
+- artist/album/genre → project: relates_to edge when music taste is relevant to a project
+- podcast/audiobook → skill: relates_to edge when the topic overlaps a skill (e.g. an ML podcast → skill-python)
+- interest → interest: relates_to edges between related interests (e.g. genre → artist, artist → album)
+- Edge weight 0.0–1.0 based on relationship strength
 """
 
 
