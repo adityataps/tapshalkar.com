@@ -76,8 +76,8 @@ async def fetch_spotify(client_id: str, client_secret: str, refresh_token: str) 
         headers = {"Authorization": f"Bearer {token}"}
 
         artists_r, tracks_r, recent_r, shows_r, audiobooks_r = await asyncio.gather(
-            client.get("https://api.spotify.com/v1/me/top/artists", headers=headers, params={"limit": 10, "time_range": "short_term"}),
-            client.get("https://api.spotify.com/v1/me/top/tracks", headers=headers, params={"limit": 10, "time_range": "short_term"}),
+            client.get("https://api.spotify.com/v1/me/top/artists", headers=headers, params={"limit": 10, "time_range": "medium_term"}),
+            client.get("https://api.spotify.com/v1/me/top/tracks", headers=headers, params={"limit": 10, "time_range": "medium_term"}),
             client.get("https://api.spotify.com/v1/me/player/recently-played", headers=headers, params={"limit": 50}),
             client.get("https://api.spotify.com/v1/me/shows", headers=headers, params={"limit": 10}),
             client.get("https://api.spotify.com/v1/me/audiobooks", headers=headers, params={"limit": 10}),
