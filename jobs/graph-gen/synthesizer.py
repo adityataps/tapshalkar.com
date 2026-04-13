@@ -183,6 +183,11 @@ async def synthesize_graph(
         for tool_use in tool_uses:
             if tool_use.name == "emit_knowledge_graph":
                 raw = tool_use.input
+                print(f"DEBUG emit_knowledge_graph: {len(raw.get('nodes', []))} nodes, {len(raw.get('edges', []))} edges")
+                if raw.get("edges"):
+                    print(f"DEBUG first edge: {raw['edges'][0]}")
+                else:
+                    print("DEBUG edges is empty or missing")
                 nodes = [Node(**{k: v for k, v in n.items() if k in NODE_FIELDS}) for n in raw.get("nodes", [])]
                 edges = [Edge(**{**{k: v for k, v in e.items() if k in EDGE_FIELDS}, "weight": e.get("weight", 1.0)}) for e in raw.get("edges", [])]
                 # Return immediately — no tool_result needed since we don't continue the loop.
