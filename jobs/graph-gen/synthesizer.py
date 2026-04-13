@@ -35,10 +35,13 @@ GRAPH_TOOL = {
                     "type": "object",
                     "properties": {
                         "id":          {"type": "string"},
-                        "type":        {"type": "string", "enum": ["skill", "project", "experience", "education", "interest", "movie", "show", "health"]},
+                        "type":        {"type": "string", "enum": ["skill", "project", "experience", "education", "interest", "health"]},
                         "label":       {"type": "string"},
                         "description": {"type": "string"},
-                        "metadata":    {"type": "object"},
+                        "metadata": {
+                            "type": "object",
+                            "description": "For interest nodes set subtype to one of: artist, album, track, podcast, audiobook, movie, show, genre",
+                        },
                     },
                     "required": ["id", "type", "label"],
                 },
@@ -70,15 +73,21 @@ You may call fetch_github_readme for up to 3 repositories to get richer project 
 Once you have enough context, call emit_knowledge_graph with the final graph.
 
 Rules:
-- Node IDs: stable snake_case prefixed by type (e.g. skill-python, project-ml-tool, movie-dune)
+- Node IDs: stable snake_case prefixed by type (e.g. skill-python, project-ml-tool)
+- For interest nodes use: interest-{subtype}-{slugified-name} (e.g. interest-artist-kendrick-lamar, interest-genre-hip-hop)
 - Infer skill nodes from GitHub languages and topics
-- Infer interest nodes from music genres, games, movies, and shows
-- Add movie/show nodes for Trakt history with metadata.url set to the Trakt URL
+- All cultural/media content uses type "interest" with metadata.subtype set to one of:
+  artist, album, track, podcast, audiobook, movie, show, genre
+- Emit up to 5 artist nodes, 3 album nodes, 5 podcast nodes, 2 audiobook nodes, 3-4 genre nodes
+- Add movie/show nodes (as interest nodes with subtype movie/show) for Trakt history
 - Add a health node if Apple Health data is present
-- Connect skills to projects (used_in edges), interests to projects (relates_to)
+- Always set metadata.url on every interest node where a URL is available
+- Always set metadata.subtype on every interest node
+- Connect skills to projects (used_in edges), interests to projects/skills (relates_to)
+- Use relates_to edges between albums and their artists
+- Use relates_to edges between podcasts/audiobooks and relevant skill or project nodes where a genuine connection exists
 - Edge weight 0.0–1.0 based on relationship strength
 - Prefer fewer accurate nodes over many speculative ones
-- Include metadata.url on project, movie, show, and interest nodes where a URL is available
 """
 
 
@@ -122,6 +131,9 @@ async def synthesize_graph(
             "top_artists": [{"name": a.name, "url": a.url, "genres": a.genres} for a in spotify.top_artists],
             "top_genres": spotify.top_genres,
             "top_tracks": [{"name": t.name, "artist": t.artist, "url": t.url} for t in spotify.top_tracks[:5]],
+            "saved_shows": [{"name": s.name, "publisher": s.publisher, "url": s.url, "description": s.description} for s in spotify.saved_shows],
+            "saved_audiobooks": [{"name": a.name, "author": a.author, "url": a.url} for a in spotify.saved_audiobooks],
+            "recent_albums": [{"name": a.name, "artist": a.artist, "url": a.url} for a in spotify.recent_albums],
         },
         "steam": {
             "most_played": [{"name": g.name, "hours": g.hours_played, "url": g.store_url} for g in steam.most_played[:5]],

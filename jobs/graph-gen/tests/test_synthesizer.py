@@ -29,10 +29,10 @@ SAMPLE_HEALTH = HealthSummary()
 MOCK_GRAPH_JSON = {
     "nodes": [
         {"id": "skill-python", "type": "skill", "label": "Python", "description": "Primary language", "metadata": {}},
-        {"id": "interest-hip-hop", "type": "interest", "label": "Hip Hop", "description": "", "metadata": {}},
+        {"id": "interest-genre-hip-hop", "type": "interest", "label": "Hip Hop", "description": "", "metadata": {"subtype": "genre"}},
     ],
     "edges": [
-        {"source": "skill-python", "target": "skill-python", "type": "relates_to", "weight": 1.0}
+        {"source": "skill-python", "target": "interest-genre-hip-hop", "type": "relates_to", "weight": 0.5}
     ]
 }
 
