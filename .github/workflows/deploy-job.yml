@@ -48,3 +48,11 @@ jobs:
             --region ${{ vars.GCP_REGION }} \
             --project ${{ vars.GCP_PROJECT_ID }} \
             --quiet
+
+      - name: Execute Cloud Run Job
+        run: |
+          gcloud run jobs execute graph-gen \
+            --region ${{ vars.GCP_REGION }} \
+            --project ${{ vars.GCP_PROJECT_ID }} \
+            --wait \
+            --quiet
