@@ -122,9 +122,8 @@ async def run_chat_stream(
         for block in message.content:
             if block.type == "text" and block.text:
                 # Yield word by word for streaming feel
-                for word in block.text.split(" "):
-                    if word:
-                        yield f'data: {json.dumps({"type": "text", "delta": word + " "})}\n\n'
+                for word in block.text.split():
+                    yield f'data: {json.dumps({"type": "text", "delta": word + " "})}\n\n'
 
         tool_use_blocks = [b for b in message.content if b.type == "tool_use"]
 
