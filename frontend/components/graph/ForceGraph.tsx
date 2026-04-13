@@ -62,6 +62,11 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
     return () => observer.disconnect();
   }, []);
 
+  // Reset settled whenever data changes so zoomToFit fires after each new graph load.
+  useEffect(() => {
+    settled.current = false;
+  }, [data]);
+
   const nodeColor = useCallback(
     (node: GraphNode) =>
       activeNodeIds.includes(node.id) ? "#ef4444" : NODE_COLORS[node.type] ?? "#888",
@@ -72,7 +77,7 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
     if (!settled.current) {
       settled.current = true;
       setCooldownTicks(0);
-      resolvedRef.current?.zoomToFit(400);
+      resolvedRef.current?.zoomToFit(400, 40);
     }
   }, [resolvedRef]);
 

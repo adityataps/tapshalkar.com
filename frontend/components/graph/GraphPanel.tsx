@@ -46,7 +46,7 @@ export default function GraphPanel({ activeNodeIds = [] }: Props) {
 
   return (
     <div className={panelClass}>
-      <div className="absolute top-2 right-2 z-10 flex gap-2">
+      <div className="absolute bottom-4 left-4 z-10 flex gap-2">
         <button
           onClick={handleReset}
           className="text-[#444444] hover:text-[#f5f5f0] text-xs px-2 py-1 border border-[#444444] hover:border-[#f5f5f0] transition-colors"
