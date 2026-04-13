@@ -48,3 +48,13 @@ jobs:
             --region ${{ vars.GCP_REGION }} \
             --project ${{ vars.GCP_PROJECT_ID }} \
             --quiet
+
+      - name: Execute Cloud Run Job
+        # Runs immediately after each deploy to refresh graph.json with the latest data.
+        # --wait blocks until the execution completes; a failed job fails this workflow step.
+        run: |
+          gcloud run jobs execute graph-gen \
+            --region ${{ vars.GCP_REGION }} \
+            --project ${{ vars.GCP_PROJECT_ID }} \
+            --wait \
+            --quiet
