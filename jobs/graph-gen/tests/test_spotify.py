@@ -62,6 +62,12 @@ async def test_fetch_spotify_returns_data():
         respx.get("https://api.spotify.com/v1/me/player/recently-played").mock(
             return_value=httpx.Response(200, json=RECENTLY_PLAYED_RESPONSE)
         )
+        respx.get("https://api.spotify.com/v1/me/shows").mock(
+            return_value=httpx.Response(200, json={"items": []})
+        )
+        respx.get("https://api.spotify.com/v1/me/audiobooks").mock(
+            return_value=httpx.Response(200, json={"items": []})
+        )
 
         data = await fetch_spotify(
             client_id="test-id",
@@ -77,3 +83,6 @@ async def test_fetch_spotify_returns_data():
     assert "hip hop" in data.top_genres
     assert len(data.recently_played) == 1
     assert data.recently_played[0].url == "https://open.spotify.com/track/creep123"
+    assert data.saved_shows == []
+    assert data.saved_audiobooks == []
+    assert data.recent_albums == []
