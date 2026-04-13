@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timezone
 
 from models import ActivityFeed, ActivityItem, NowSnapshot
+from sources.bio import load_bio
 from sources.github import fetch_github
 from sources.spotify import fetch_spotify
 from sources.steam import fetch_steam
@@ -45,6 +46,12 @@ async def run():
     api_key = os.environ["ANTHROPIC_API_KEY"]
     health_prefix = os.environ.get("APPLE_HEALTH_PREFIX", "data/ephemeral/apple-health/")
 
+    bio = load_bio()
+    if bio:
+        print(f"Loaded bio.md ({len(bio)} chars)")
+    else:
+        print("No bio.md found — skipping bio context")
+
     print("Fetching sources in parallel...")
     github, spotify, steam, health = await asyncio.gather(
         fetch_github(username=os.environ["GITHUB_USERNAME"], token=os.environ["GITHUB_TOKEN"]),
@@ -76,6 +83,7 @@ async def run():
     graph = await synthesize_graph(
         github=github, spotify=spotify, steam=steam,
         trakt=trakt, health=health, api_key=api_key,
+        bio=bio,
     )
     print(f"Graph: {len(graph.nodes)} nodes, {len(graph.edges)} edges")
 
@@ -84,7 +92,7 @@ async def run():
     currently = build_currently(github, spotify, steam, trakt)
 
     print("Writing outputs to GCS...")
-    await write_outputs(bucket=bucket, graph=graph, feed=feed, now=now, currently=currently)
+    await write_outputs(bucket=bucket, graph=graph, feed=feed, now=now, currently=currently, bio=bio)
     print("Done.")
 
 
