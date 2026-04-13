@@ -80,7 +80,7 @@ Node rules:
 - Infer skill nodes from GitHub languages and topics
 - All cultural/media content uses type "interest" with metadata.subtype set to one of:
   artist, album, track, podcast, audiobook, movie, show, genre
-- Emit up to 5 artist nodes, 3 album nodes, 5 podcast nodes, 2 audiobook nodes, 3-4 genre nodes
+- Emit up to 5 artist nodes, 3 album nodes, 3 podcast nodes, 2 audiobook nodes, 3 genre nodes
 - Add movie/show nodes (as interest nodes with subtype movie/show) for Trakt history
 - Add a health node if Apple Health data is present
 - Always set metadata.url on every interest node where a URL is available
@@ -166,7 +166,7 @@ async def synthesize_graph(
         message = await asyncio.to_thread(
             client.messages.create,
             model="claude-opus-4-6",
-            max_tokens=4096,
+            max_tokens=16384,
             system=SYSTEM_PROMPT,
             tools=[README_TOOL, GRAPH_TOOL],
             messages=messages,
