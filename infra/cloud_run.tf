@@ -30,6 +30,11 @@ resource "google_cloud_run_v2_service" "backend" {
         value = google_storage_bucket.static_site.name
       }
 
+      env {
+        name  = "MODEL_ARMOR_TEMPLATE"
+        value = google_model_armor_template.chat_shield.name
+      }
+
       dynamic "env" {
         for_each = {
           "ANTHROPIC_API_KEY" = "anthropic-api-key"

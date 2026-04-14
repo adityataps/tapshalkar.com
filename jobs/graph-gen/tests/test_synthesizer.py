@@ -62,6 +62,7 @@ async def test_synthesize_returns_graph_output():
             trakt=SAMPLE_TRAKT,
             health=SAMPLE_HEALTH,
             api_key="test-key",
+            bio="test bio",
         )
 
     assert isinstance(result, GraphOutput)

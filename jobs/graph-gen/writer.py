@@ -71,12 +71,21 @@ def _sync_upload(bucket_name: str, uploads: dict[str, str]) -> None:
         blob.upload_from_string(content, content_type="application/json")
 
 
+def _upload_text(bucket_name: str, key: str, content: str) -> None:
+    client = storage.Client()
+    gcs_bucket = client.bucket(bucket_name)
+    blob = gcs_bucket.blob(key)
+    blob.cache_control = "public, max-age=300"
+    blob.upload_from_string(content, content_type="text/plain")
+
+
 async def write_outputs(
     bucket: str,
     graph: GraphOutput,
     feed: ActivityFeed,
     now: NowSnapshot,
     currently: dict,
+    bio: str = "",
 ) -> None:
     uploads = {
         "graph.json": _serialise(graph),
@@ -85,3 +94,5 @@ async def write_outputs(
         "currently.json": json.dumps(currently, indent=2),
     }
     await asyncio.to_thread(_sync_upload, bucket, uploads)
+    if bio:
+        await asyncio.to_thread(_upload_text, bucket, "bio.md", bio)

@@ -65,10 +65,22 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
     links: data.edges.map((e) => ({ source: e.source, target: e.target, type: e.type, weight: e.weight })),
   }), [data]);
 
+  const activeSet = useMemo(() => new Set(activeNodeIds), [activeNodeIds]);
+
   const nodeColor = useCallback(
     (node: GraphNode) =>
-      activeNodeIds.includes(node.id) ? "#ef4444" : NODE_COLORS[node.type] ?? "#888",
-    [activeNodeIds]
+      activeSet.has(node.id) ? "#ef4444" : NODE_COLORS[node.type] ?? "#888",
+    [activeSet]
+  );
+
+  const linkColor = useCallback(
+    (link: object) => {
+      const l = link as { source: string | GraphNode; target: string | GraphNode };
+      const src = typeof l.source === "string" ? l.source : (l.source as GraphNode).id;
+      const tgt = typeof l.target === "string" ? l.target : (l.target as GraphNode).id;
+      return activeSet.has(src) && activeSet.has(tgt) ? "#ef4444" : "#1e1e1e";
+    },
+    [activeSet]
   );
 
   const nodeLabel = useCallback((node: GraphNode) => {
@@ -92,7 +104,7 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
           nodeColor={nodeColor as (node: object) => string}
           nodeRelSize={5}
           warmupTicks={150}
-          linkColor={() => "#1e1e1e"}
+          linkColor={linkColor}
           linkWidth={(link: object) => ((link as GraphEdge).weight ?? 1) * 1.5}
           onNodeClick={onNodeClick as ((node: object) => void) | undefined}
         />

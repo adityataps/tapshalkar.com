@@ -11,6 +11,7 @@ dependencies = [
     "pydantic-settings>=2.6",
     "httpx>=0.28",
     "email-validator>=2.3.0",
+    "anthropic>=0.40",
 ]
 
 [dependency-groups]
@@ -18,6 +19,7 @@ dev = [
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
     "anyio>=4.7",
+    "respx>=0.23.1",
 ]
 
 [tool.pytest.ini_options]
