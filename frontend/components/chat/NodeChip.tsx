@@ -1,5 +1,5 @@
-import type { GraphNode } from "@/components/graph/ForceGraph";
-import { NODE_COLORS } from "@/components/graph/ForceGraph";
+import type { GraphNode } from "@/components/graph/types";
+import { NODE_COLORS } from "@/components/graph/types";
 
 interface Props {
   node: GraphNode;

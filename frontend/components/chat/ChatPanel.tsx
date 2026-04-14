@@ -5,7 +5,7 @@ import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import SuggestedPrompts from "./SuggestedPrompts";
 import NodeChip from "./NodeChip";
-import type { GraphNode } from "@/components/graph/ForceGraph";
+import type { GraphNode } from "@/components/graph/types";
 
 interface Message {
   role: "user" | "assistant";

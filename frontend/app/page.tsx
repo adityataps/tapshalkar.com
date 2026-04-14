@@ -3,7 +3,7 @@
 import { useState } from "react";
 import GraphPanel from "@/components/graph/GraphPanel";
 import ChatPanel from "@/components/chat/ChatPanel";
-import type { GraphNode } from "@/components/graph/ForceGraph";
+import type { GraphNode } from "@/components/graph/types";
 
 export default function Home() {
   const [activeNodeIds, setActiveNodeIds] = useState<string[]>([]);
