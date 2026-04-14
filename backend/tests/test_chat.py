@@ -137,15 +137,22 @@ from httpx import AsyncClient, ASGITransport
 from app.main import app
 
 
+@pytest.fixture(autouse=True)
+def mock_app_state():
+    """Ensure app.state is populated for all chat tests."""
+    from app.main import app
+    app.state.graph = {"nodes": [], "edges": []}
+    app.state.bio = "test bio"
+    app.state.currently = {}
+
+
 @pytest.mark.anyio
 async def test_chat_endpoint_returns_sse_stream():
     async def fake_stream(**kwargs):
-        async def _gen():
-            yield 'data: {"type": "text", "delta": "Hello "}\n\n'
-            yield 'data: {"type": "done", "activeNodeIds": []}\n\n'
-        return _gen()
+        yield 'data: {"type": "text", "delta": "Hello "}\n\n'
+        yield 'data: {"type": "done", "activeNodeIds": []}\n\n'
 
-    with patch("app.routers.chat.run_chat_stream", side_effect=fake_stream):
+    with patch("app.routers.chat.run_chat_stream", return_value=fake_stream()):
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
             response = await client.post(
                 "/api/chat",
