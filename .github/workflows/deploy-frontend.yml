@@ -49,6 +49,9 @@ jobs:
         run: |
           gsutil -m rsync -r -d -x '^(graph|activity-feed|now|currently)\.json$|^Resume_Aditya_Tapshalkar\.pdf$|^resume_parsed\.md$' out/ gs://${{ vars.GCS_BUCKET }}/
 
+      - name: Install GCS Python client
+        run: pip install --quiet google-cloud-storage
+
       - name: Publish clean URLs
         # GCS CDN backend accesses the bucket as an object store — /about resolves
         # to an object named "about", not "about.html". Copy each page to an
@@ -57,20 +60,28 @@ jobs:
           GCS_BUCKET: ${{ vars.GCS_BUCKET }}
         run: |
           python3 - <<'EOF'
-          import subprocess, os
+          import os
           from pathlib import Path
-          bucket = os.environ["GCS_BUCKET"]
+          from google.cloud import storage
+
+          bucket_name = os.environ["GCS_BUCKET"]
+          client = storage.Client()
+          bucket = client.bucket(bucket_name)
           skip = {"index.html", "404.html", "_not-found.html"}
+
           for p in sorted(Path("out").rglob("*.html")):
               if p.name in skip:
                   continue
               clean = str(p.relative_to("out").with_suffix(""))
-              print(f"  {p} → gs://{bucket}/{clean}")
-              subprocess.run(
-                  ["gsutil", "-h", "Content-Type:text/html;charset=utf-8",
-                   "cp", str(p), f"gs://{bucket}/{clean}"],
-                  check=True,
+              print(f"  {p} → gs://{bucket_name}/{clean}")
+              blob = bucket.blob(clean)
+              blob.upload_from_filename(
+                  str(p),
+                  content_type="text/html;charset=utf-8",
               )
+              blob.cache_control = "public, max-age=3600"
+              blob.patch()
+              print(f"    ✓ uploaded ({p.stat().st_size} bytes)")
           EOF
 
       - name: Invalidate CDN cache
