@@ -171,7 +171,7 @@ export default function ChatPanel({
       )}
 
       {selectedNodes.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1.5 pt-2 border-t border-[#1e1e1e]">
           {selectedNodes.map((node) => (
             <NodeChip
               key={node.id}
