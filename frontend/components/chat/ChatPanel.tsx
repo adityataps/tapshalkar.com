@@ -85,8 +85,8 @@ export default function ChatPanel({
       });
 
       if (!response.ok || !response.body) {
-        setMessages((prev) => [
-          ...prev,
+        setMessages([
+          ...uiMessages,
           { role: "assistant", content: "Something went wrong. Please try again." },
         ]);
         setIsStreaming(false);
@@ -123,11 +123,11 @@ export default function ChatPanel({
       }
 
       if (accumulated) {
-        setMessages((prev) => [...prev, { role: "assistant", content: accumulated }]);
+        setMessages([...uiMessages, { role: "assistant", content: accumulated }]);
       }
     } catch {
-      setMessages((prev) => [
-        ...prev,
+      setMessages([
+        ...uiMessages,
         { role: "assistant", content: "Something went wrong. Please try again." },
       ]);
     } finally {
