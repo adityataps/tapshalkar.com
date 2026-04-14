@@ -14,15 +14,15 @@ export default function Nav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-[#1e1e1e] bg-[#0d0d0d]/90 backdrop-blur-sm">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-        <Link href="/" className="font-serif text-sm font-bold text-[#f5f5f0] tracking-wide">
-          Aditya T.
+        <Link href="/" className="font-mono text-sm text-[#ef4444] tracking-wide">
+          ~/Aditya-Tapshalkar
         </Link>
         <div className="flex gap-6">
           {links.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
-              className={`text-xs tracking-widest uppercase transition-colors ${
+              className={`font-mono text-xs tracking-widest uppercase transition-colors ${
                 pathname.startsWith(href) ? "text-[#ef4444]" : "text-[#444444] hover:text-[#f5f5f0]"
               }`}
             >

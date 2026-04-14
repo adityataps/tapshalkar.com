@@ -18,6 +18,18 @@ export default function About() {
         <p>
           Currently building tapshalkar.com. Previously various things.
         </p>
+        <ul className="space-y-1 pt-2">
+          {[
+            "coffee addict",
+            "swimmer",
+            "homelab hobbyist",
+            "cat dad of two cats",
+          ].map((item) => (
+            <li key={item} className="font-mono text-xs text-[#333333] before:content-['→_'] before:text-[#ef4444]">
+              {item}
+            </li>
+          ))}
+        </ul>
       </div>
 
       <h2 className="font-serif text-xl font-bold text-[#f5f5f0] mb-4">Links</h2>
