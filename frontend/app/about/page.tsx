@@ -8,8 +8,7 @@ const socials = [
 export default function About() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-16">
-      <p className="font-mono text-[#ef4444] text-xs tracking-widest uppercase mb-2">~/about</p>
-      <h1 className="font-serif text-4xl font-bold text-[#f5f5f0] mb-8">About</h1>
+      <p className="font-mono text-[#ef4444] text-xs tracking-widest uppercase mb-8">~/about</p>
 
       <div className="space-y-4 text-[#444444] text-sm leading-relaxed mb-12">
         <p>

@@ -20,6 +20,7 @@ interface Props {
 export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], onNodeSelect, onDeselectAll, rightPanel }: Props) {
   const [data, setData] = useState<GraphData>(EMPTY_GRAPH);
   const [expanded, setExpanded] = useState(false);
+  const [chatOpen, setChatOpen] = useState(true);
   const graphRef = useRef<ForceGraphMethods | undefined>(undefined);
 
   useEffect(() => {
@@ -90,16 +91,25 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
           {controls}
           {nodeEdgeCount}
           {graph}
+          {rightPanel && !chatOpen && (
+            <button
+              onClick={() => setChatOpen(true)}
+              className="absolute top-1/2 right-0 -translate-y-1/2 z-10 px-1.5 py-3 border border-r-0 border-[#1e1e1e] bg-[#0d0d0d] text-[#444444] hover:text-[#f5f5f0] hover:border-[#444444] transition-colors"
+              title="Open chat"
+            >
+              <span className="font-mono text-xs">‹</span>
+            </button>
+          )}
         </div>
-        {rightPanel && (
+        {rightPanel && chatOpen && (
           <div className="w-[360px] border-l border-[#1e1e1e] flex-shrink-0 flex flex-col">
-            <div className="flex justify-end px-4 pt-3 pb-2 border-b border-[#1e1e1e]">
+            <div className="flex justify-between px-4 pt-3 pb-2 border-b border-[#1e1e1e]">
               <button
-                onClick={() => setExpanded(false)}
+                onClick={() => setChatOpen(false)}
                 className="text-[#444444] hover:text-[#f5f5f0] text-xs transition-colors"
-                title="Close"
+                title="Collapse chat"
               >
-                ✕
+                ›
               </button>
             </div>
             <div className="flex-1 min-h-0 p-4">
