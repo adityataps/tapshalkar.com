@@ -48,6 +48,16 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Scroll indicator */}
+      <div className="flex justify-center pb-8 -mt-8">
+        <div className="flex flex-col items-center gap-1 animate-bounce">
+          <span className="font-mono text-[#444444] text-[10px] tracking-[0.2em] uppercase">ask me</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-[#444444]">
+            <path d="M1 4l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
       {/* Divider */}
       <div className="border-t border-[#1e1e1e]" />
 
