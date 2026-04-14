@@ -106,7 +106,9 @@ export default function Home() {
 
       {/* Chat section */}
       <section className="mx-auto max-w-6xl px-6 py-16">
-        <ChatPanel {...chatProps} />
+        <div className="h-[560px]">
+          <ChatPanel {...chatProps} />
+        </div>
       </section>
     </div>
   );

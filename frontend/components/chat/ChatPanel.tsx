@@ -10,6 +10,7 @@ import type { GraphNode } from "@/components/graph/types";
 export interface Message {
   role: "user" | "assistant";
   content: string;
+  contextNodes?: { id: string; label: string; type: string }[];
 }
 
 interface Props {
@@ -55,7 +56,16 @@ export default function ChatPanel({
       ? ` [context: ${selectedNodes.map((n) => n.label).join(", ")}]`
       : "";
 
-    const uiMessages: Message[] = [...messages, { role: "user", content: text }];
+    const uiMessages: Message[] = [
+      ...messages,
+      {
+        role: "user",
+        content: text,
+        contextNodes: selectedNodes.length > 0
+          ? selectedNodes.map(({ id, label, type }) => ({ id, label, type }))
+          : undefined,
+      },
+    ];
     setMessages(uiMessages);
     setIsStreaming(true);
     setStreamingContent("");
@@ -152,7 +162,7 @@ export default function ChatPanel({
           className="flex flex-col gap-4 flex-1 overflow-y-auto pr-2 min-h-0"
         >
           {messages.map((m, i) => (
-            <ChatMessage key={i} role={m.role} content={m.content} />
+            <ChatMessage key={i} role={m.role} content={m.content} contextNodes={m.contextNodes} />
           ))}
           {isStreaming && streamingContent && (
             <ChatMessage role="assistant" content={streamingContent} isStreaming />
