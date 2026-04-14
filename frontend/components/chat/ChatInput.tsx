@@ -41,7 +41,7 @@ export default function ChatInput({ onSend, disabled = false }: Props) {
         disabled={disabled || !value.trim()}
         className="font-mono text-xs border border-[#ef4444] text-[#ef4444] px-3 py-1.5 hover:bg-[#ef4444] hover:text-[#0d0d0d] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
       >
-        send →
+        send > $
       </button>
     </div>
   );

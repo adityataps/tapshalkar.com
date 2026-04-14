@@ -25,7 +25,7 @@ export default function About() {
             "homelab hobbyist",
             "dad of two cats",
           ].map((item) => (
-            <li key={item} className="font-mono text-xs text-[#555555] before:content-['→_'] before:text-[#ef4444]">
+            <li key={item} className="font-mono text-xs text-[#555555] before:content-['>_$_'] before:text-[#ef4444]">
               {item}
             </li>
           ))}

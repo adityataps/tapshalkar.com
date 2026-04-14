@@ -43,7 +43,7 @@ export default function ChatMessage({ role, content, isStreaming = false, contex
 
   return (
     <div className="flex gap-3 items-start">
-      <span className="text-[#ef4444] font-mono text-xs mt-1 shrink-0">AT →</span>
+      <span className="text-[#ef4444] font-mono text-xs mt-1 shrink-0">AT > $</span>
       <div className="text-[#f5f5f0] font-mono text-sm leading-relaxed prose-invert max-w-none
         [&_strong]:font-bold [&_strong]:text-[#f5f5f0]
         [&_em]:italic [&_em]:text-[#f5f5f0]
