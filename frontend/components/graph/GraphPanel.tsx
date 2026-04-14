@@ -111,6 +111,13 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
               >
                 ›
               </button>
+              <button
+                onClick={() => setExpanded(false)}
+                className="text-[#444444] hover:text-[#f5f5f0] text-xs transition-colors"
+                title="Exit fullscreen"
+              >
+                ✕
+              </button>
             </div>
             <div className="flex-1 min-h-0 p-4">
               {rightPanel}
