@@ -50,17 +50,19 @@ jobs:
           gsutil -m rsync -r -d -x '^(graph|activity-feed|now|currently)\.json$|^Resume_Aditya_Tapshalkar\.pdf$|^resume_parsed\.md$' out/ gs://${{ vars.GCS_BUCKET }}/
 
       - name: Publish clean URLs
-        # GCS CDN backend accesses the bucket as an object store, not via website
-        # hosting config — so /about looks for an object named "about", not "about.html".
-        # Copy each page to an extensionless path with the correct Content-Type.
+        # GCS CDN backend accesses the bucket as an object store — /about resolves
+        # to an object named "about", not "about.html". Copy each page to an
+        # extensionless path so direct loads and refreshes work.
+        env:
+          GCS_BUCKET: ${{ vars.GCS_BUCKET }}
         run: |
-          find out -name "*.html" \
-            ! -name "index.html" ! -name "404.html" ! -name "_not-found.html" \
-            -printf '%P\n' | while IFS= read -r rel; do
-              clean="${rel%.html}"
-              gsutil -h "Content-Type:text/html;charset=utf-8" \
-                cp "out/$rel" "gs://${{ vars.GCS_BUCKET }}/$clean"
-          done
+          cd out
+          while IFS= read -r path; do
+            path="${path#./}"
+            clean="${path%.html}"
+            echo "  $path → gs://$GCS_BUCKET/$clean"
+            gsutil -h "Content-Type:text/html;charset=utf-8" cp "$path" "gs://$GCS_BUCKET/$clean"
+          done < <(find . -name "*.html" ! -name "index.html" ! -name "404.html" ! -name "_not-found.html")
 
       - name: Invalidate CDN cache
         run: |
