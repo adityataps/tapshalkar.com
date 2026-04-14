@@ -44,7 +44,7 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
   useEffect(() => {
     if (activeNodeIds.length === 0) return;
     const t = setTimeout(() => {
-      graphRef.current?.zoomToFit(600, 80, (node) => activeNodeIds.includes((node as GraphNode).id));
+      graphRef.current?.zoomToFit(600, 150, (node) => activeNodeIds.includes((node as GraphNode).id));
     }, 150);
     return () => clearTimeout(t);
   }, [activeNodeIds]);
