@@ -16,6 +16,7 @@ export default function Home() {
         ? prev.filter((n) => n.id !== node.id)
         : [...prev, node]
     );
+    setActiveNodeIds((prev) => prev.filter((id) => id !== node.id));
   };
 
   const handleDeselectNode = (id: string) => {
