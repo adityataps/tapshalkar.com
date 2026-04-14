@@ -28,11 +28,12 @@ export interface GraphData {
 interface Props {
   data: GraphData;
   activeNodeIds?: string[];
+  selectedNodeIds?: string[];
   onNodeClick?: (node: GraphNode) => void;
   graphRef?: React.MutableRefObject<ForceGraphMethods | undefined>;
 }
 
-const NODE_COLORS: Record<GraphNode["type"], string> = {
+export const NODE_COLORS: Record<GraphNode["type"], string> = {
   skill:      "#3b82f6",
   project:    "#34d399",
   experience: "#a78bfa",
@@ -41,11 +42,10 @@ const NODE_COLORS: Record<GraphNode["type"], string> = {
   health:     "#4ade80",
 };
 
-export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, graphRef }: Props) {
+export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds = [], onNodeClick, graphRef }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  // Internal ref used when no graphRef is passed in from the parent
   const internalRef = useRef<ForceGraphMethods | undefined>(undefined);
   const resolvedRef = graphRef ?? internalRef;
 
@@ -66,11 +66,15 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
   }), [data]);
 
   const activeSet = useMemo(() => new Set(activeNodeIds), [activeNodeIds]);
+  const selectedSet = useMemo(() => new Set(selectedNodeIds), [selectedNodeIds]);
 
   const nodeColor = useCallback(
-    (node: GraphNode) =>
-      activeSet.has(node.id) ? "#ef4444" : NODE_COLORS[node.type] ?? "#888",
-    [activeSet]
+    (node: GraphNode) => {
+      if (selectedSet.has(node.id)) return "#22d3ee";
+      if (activeSet.has(node.id)) return "#ef4444";
+      return NODE_COLORS[node.type] ?? "#888";
+    },
+    [selectedSet, activeSet]
   );
 
   const linkColor = useCallback(
