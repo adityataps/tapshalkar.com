@@ -15,6 +15,7 @@ export interface Message {
 
 interface Props {
   onActiveNodesChange: (ids: string[]) => void;
+  onActiveNodesPreview?: (ids: string[]) => void;
   selectedNodes?: GraphNode[];
   onClearSelectedNodes?: () => void;
   onDeselectNode?: (id: string) => void;
@@ -25,6 +26,7 @@ interface Props {
 
 export default function ChatPanel({
   onActiveNodesChange,
+  onActiveNodesPreview,
   selectedNodes = [],
   onClearSelectedNodes,
   onDeselectNode,
@@ -110,6 +112,8 @@ export default function ChatPanel({
             if (event.type === "text") {
               accumulated += event.delta;
               setStreamingContent(accumulated);
+            } else if (event.type === "nodes") {
+              onActiveNodesPreview?.(event.activeNodeIds ?? []);
             } else if (event.type === "done") {
               onActiveNodesChange(event.activeNodeIds ?? []);
             } else if (event.type === "blocked" || event.type === "error") {

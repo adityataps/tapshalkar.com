@@ -66,6 +66,9 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
       const x = n.x ?? 0;
       const y = n.y ?? 0;
 
+      const dimmed = activeSet.size > 0 && !activeSet.has(n.id) && !selectedSet.has(n.id);
+      ctx.globalAlpha = dimmed ? 0.2 : 1;
+
       // Always fill with type color
       ctx.beginPath();
       ctx.arc(x, y, r, 0, 2 * Math.PI);
@@ -89,6 +92,8 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
         ctx.lineWidth = 1.5;
         ctx.stroke();
       }
+
+      ctx.globalAlpha = 1;
     },
     [selectedSet, activeSet]
   );

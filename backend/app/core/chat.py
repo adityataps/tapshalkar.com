@@ -161,6 +161,7 @@ async def run_chat_stream(
                     nodes, node_ids, edges = search_graph(tool_use.input.get("query", ""), graph)
                     active_node_ids.update(node_ids)
                     content = json.dumps({"nodes": nodes, "related_edges": edges})
+                    yield f'data: {json.dumps({"type": "nodes", "activeNodeIds": list(active_node_ids)})}\n\n'
                 elif tool_use.name == "get_current_activity":
                     content = json.dumps(currently)
                 elif tool_use.name == "get_resume":
