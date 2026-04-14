@@ -55,23 +55,21 @@ def parse_resume(cloud_event):
         print(f"Ignoring {file_name}")
         return
 
-    print(f"Parsing {file_name} from gs://{bucket_name}/")
-
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-    pdf_bytes = bucket.blob(file_name).download_as_bytes()
-    print(f"Downloaded {len(pdf_bytes)} bytes")
+    gcs_uri = f"gs://{bucket_name}/{file_name}"
+    print(f"Parsing {gcs_uri}")
 
     processor_name = os.environ["DOCUMENT_AI_PROCESSOR_NAME"]
+    print(f"Processor: {processor_name}")
     location = processor_name.split("/")[3]
     opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
     docai_client = documentai.DocumentProcessorServiceClient(client_options=opts)
 
+    # Pass a GCS reference — avoids inline size limits and works well with Layout Parser
     result = docai_client.process_document(
         request=documentai.ProcessRequest(
             name=processor_name,
-            raw_document=documentai.RawDocument(
-                content=pdf_bytes,
+            gcs_document=documentai.GcsDocument(
+                gcs_uri=gcs_uri,
                 mime_type="application/pdf",
             ),
         )
@@ -84,11 +82,12 @@ def parse_resume(cloud_event):
         body = _blocks_to_markdown(layout_blocks)
         print(f"Converted {len(layout_blocks)} layout blocks to markdown")
     else:
-        # Fallback: plain text from document
         body = doc.text
         print(f"No layout blocks — falling back to plain text ({len(body)} chars)")
 
+    storage_client = storage.Client()
     output = f"# Resume — Aditya Tapshalkar\n\n{body}"
-    blob = bucket.blob(OUTPUT_FILENAME)
-    blob.upload_from_string(output, content_type="text/plain; charset=utf-8")
+    storage_client.bucket(bucket_name).blob(OUTPUT_FILENAME).upload_from_string(
+        output, content_type="text/plain; charset=utf-8"
+    )
     print(f"Wrote gs://{bucket_name}/{OUTPUT_FILENAME} ({len(output)} chars)")
