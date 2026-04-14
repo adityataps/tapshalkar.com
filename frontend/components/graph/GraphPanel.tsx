@@ -40,6 +40,12 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
 
   const handleReset = () => graphRef.current?.zoomToFit(400);
 
+  const nodeEdgeCount = data.nodes.length > 0 && (
+    <div className="absolute bottom-4 right-4 z-10 font-mono text-[#333333] text-[9px] tracking-[0.12em] select-none">
+      {data.nodes.length} nodes · {data.edges.length} edges
+    </div>
+  );
+
   const controls = (
     <div className="absolute bottom-4 left-4 z-10 flex gap-2 items-center">
       <button
@@ -82,6 +88,7 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
       <div className="fixed inset-0 z-50 bg-[#0d0d0d] flex transition-all duration-300">
         <div className="flex-1 relative overflow-hidden">
           {controls}
+          {nodeEdgeCount}
           {graph}
         </div>
         {rightPanel && (
@@ -107,6 +114,7 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
   return (
     <div className="relative w-full h-full bg-[#0d0d0d] rounded-lg overflow-hidden border border-[#1e1e1e]">
       {controls}
+      {nodeEdgeCount}
       {graph}
     </div>
   );
