@@ -47,7 +47,7 @@ jobs:
 
       - name: Deploy to GCS
         run: |
-          gsutil -m rsync -r -d -x '^(graph|activity-feed|now|currently)\.json$' out/ gs://${{ vars.GCS_BUCKET }}/
+          gsutil -m rsync -r -d -x '^(graph|activity-feed|now|currently)\.json$|^resume\.pdf$' out/ gs://${{ vars.GCS_BUCKET }}/
 
       - name: Invalidate CDN cache
         run: |
