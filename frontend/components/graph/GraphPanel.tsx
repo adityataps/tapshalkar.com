@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { ForceGraphMethods } from "react-force-graph-2d";
-import type { GraphData, GraphNode } from "./ForceGraph";
+import type { GraphData, GraphNode } from "./types";
 
 const ForceGraph = dynamic(() => import("./ForceGraph"), { ssr: false });
 
