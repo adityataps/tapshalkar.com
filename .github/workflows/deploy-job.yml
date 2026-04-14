@@ -1,6 +1,11 @@
 name: Deploy Graph-Gen Job
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "jobs/graph-gen/**"
+      - ".github/workflows/deploy-job.yml"
   workflow_dispatch:
 
 permissions:
