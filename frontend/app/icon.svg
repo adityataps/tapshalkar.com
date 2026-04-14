@@ -4,11 +4,11 @@
     x="32"
     y="32"
     font-family="'Courier New', Courier, monospace"
-    font-size="13"
+    font-size="16"
     font-weight="bold"
     fill="#ef4444"
     text-anchor="middle"
     dominant-baseline="central"
-    letter-spacing="-0.5"
+    letter-spacing="-1"
   >~/AT</text>
 </svg>

@@ -3,6 +3,10 @@ import anthropic
 from typing import AsyncGenerator
 from app.core.model_armor import shield
 
+
+def _error_event(message: str) -> str:
+    return f'data: {json.dumps({"type": "error", "message": message})}\n\n'
+
 MAX_TOOL_ITERATIONS = 5
 
 SEARCH_GRAPH_TOOL = {
@@ -120,53 +124,70 @@ async def run_chat_stream(
     loop_messages = list(messages)
     emitted_text = False
 
-    for _ in range(MAX_TOOL_ITERATIONS):
-        if emitted_text:
-            yield f'data: {json.dumps({"type": "text", "delta": "\n\n"})}\n\n'
+    try:
+        for _ in range(MAX_TOOL_ITERATIONS):
+            if emitted_text:
+                yield f'data: {json.dumps({"type": "text", "delta": "\n\n"})}\n\n'
 
-        async with client.messages.stream(
-            model="claude-opus-4-6",
-            max_tokens=1024,
-            system=system,
-            tools=[SEARCH_GRAPH_TOOL, GET_ACTIVITY_TOOL, GET_RESUME_TOOL],
-            messages=loop_messages,
-        ) as stream:
-            async for text in stream.text_stream:
-                emitted_text = True
-                yield f'data: {json.dumps({"type": "text", "delta": text})}\n\n'
-            message = await stream.get_final_message()
+            async with client.messages.stream(
+                model="claude-opus-4-6",
+                max_tokens=1024,
+                system=system,
+                tools=[SEARCH_GRAPH_TOOL, GET_ACTIVITY_TOOL, GET_RESUME_TOOL],
+                messages=loop_messages,
+            ) as stream:
+                async for text in stream.text_stream:
+                    emitted_text = True
+                    yield f'data: {json.dumps({"type": "text", "delta": text})}\n\n'
+                message = await stream.get_final_message()
 
-        tool_use_blocks = [b for b in message.content if b.type == "tool_use"]
+            tool_use_blocks = [b for b in message.content if b.type == "tool_use"]
 
-        if not tool_use_blocks:
-            break
+            if not tool_use_blocks:
+                break
 
-        # Signal tool use to client
-        for tool_use in tool_use_blocks:
-            yield f'data: {json.dumps({"type": "tool_use", "name": tool_use.name})}\n\n'
+            # Signal tool use to client
+            for tool_use in tool_use_blocks:
+                yield f'data: {json.dumps({"type": "tool_use", "name": tool_use.name})}\n\n'
 
-        # Append assistant turn and execute tools
-        loop_messages.append({"role": "assistant", "content": message.content})
-        tool_results = []
+            # Append assistant turn and execute tools
+            loop_messages.append({"role": "assistant", "content": message.content})
+            tool_results = []
 
-        for tool_use in tool_use_blocks:
-            if tool_use.name == "search_knowledge_graph":
-                nodes, node_ids, edges = search_graph(tool_use.input.get("query", ""), graph)
-                active_node_ids.update(node_ids)
-                content = json.dumps({"nodes": nodes, "related_edges": edges})
-            elif tool_use.name == "get_current_activity":
-                content = json.dumps(currently)
-            elif tool_use.name == "get_resume":
-                content = resume if resume else "Resume not available."
-            else:
-                content = "Unknown tool."
+            for tool_use in tool_use_blocks:
+                if tool_use.name == "search_knowledge_graph":
+                    nodes, node_ids, edges = search_graph(tool_use.input.get("query", ""), graph)
+                    active_node_ids.update(node_ids)
+                    content = json.dumps({"nodes": nodes, "related_edges": edges})
+                elif tool_use.name == "get_current_activity":
+                    content = json.dumps(currently)
+                elif tool_use.name == "get_resume":
+                    content = resume if resume else "Resume not available."
+                else:
+                    content = "Unknown tool."
 
-            tool_results.append({
-                "type": "tool_result",
-                "tool_use_id": tool_use.id,
-                "content": content,
-            })
+                tool_results.append({
+                    "type": "tool_result",
+                    "tool_use_id": tool_use.id,
+                    "content": content,
+                })
 
-        loop_messages.append({"role": "user", "content": tool_results})
+            loop_messages.append({"role": "user", "content": tool_results})
+
+    except anthropic.RateLimitError:
+        yield _error_event("I'm being rate limited right now. Please try again in a moment.")
+        return
+    except anthropic.APIStatusError as e:
+        if e.status_code == 529:
+            yield _error_event("The AI is overloaded right now. Please try again in a moment.")
+        else:
+            yield _error_event("Something went wrong on my end. Please try again.")
+        return
+    except anthropic.APIConnectionError:
+        yield _error_event("Couldn't reach the AI service. Check your connection and try again.")
+        return
+    except Exception:
+        yield _error_event("Something went wrong. Please try again.")
+        return
 
     yield f'data: {json.dumps({"type": "done", "activeNodeIds": list(active_node_ids)})}\n\n'

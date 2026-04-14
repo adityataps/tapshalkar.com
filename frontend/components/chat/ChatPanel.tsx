@@ -112,7 +112,7 @@ export default function ChatPanel({
               setStreamingContent(accumulated);
             } else if (event.type === "done") {
               onActiveNodesChange(event.activeNodeIds ?? []);
-            } else if (event.type === "blocked") {
+            } else if (event.type === "blocked" || event.type === "error") {
               accumulated = event.message;
               setStreamingContent(accumulated);
             }
