@@ -42,10 +42,29 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
   const selectedSet = useMemo(() => new Set(selectedNodeIds), [selectedNodeIds]);
 
   const nodeColor = useCallback(
-    (node: GraphNode) => {
-      if (selectedSet.has(node.id)) return "#22d3ee";
-      if (activeSet.has(node.id)) return "#ef4444";
-      return NODE_COLORS[node.type] ?? "#888";
+    (node: GraphNode) => activeSet.has(node.id) ? "#ef4444" : (NODE_COLORS[node.type] ?? "#888"),
+    [activeSet]
+  );
+
+  const nodeCanvasObject = useCallback(
+    (node: object, ctx: CanvasRenderingContext2D) => {
+      const n = node as GraphNode;
+      const r = 5;
+      const x = n.x ?? 0;
+      const y = n.y ?? 0;
+
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, 2 * Math.PI);
+      ctx.fillStyle = activeSet.has(n.id) ? "#ef4444" : (NODE_COLORS[n.type] ?? "#888");
+      ctx.fill();
+
+      if (selectedSet.has(n.id)) {
+        ctx.beginPath();
+        ctx.arc(x, y, r + 2.5, 0, 2 * Math.PI);
+        ctx.strokeStyle = "#22d3ee";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
     },
     [selectedSet, activeSet]
   );
@@ -84,6 +103,8 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
           backgroundColor="#0d0d0d"
           nodeLabel={nodeLabel as (node: object) => string}
           nodeColor={nodeColor as (node: object) => string}
+          nodeCanvasObject={nodeCanvasObject}
+          nodeCanvasObjectMode={() => "replace"}
           nodeRelSize={5}
           warmupTicks={150}
           linkColor={linkColor}

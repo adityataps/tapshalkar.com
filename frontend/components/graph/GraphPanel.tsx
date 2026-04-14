@@ -76,8 +76,19 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
           {graph}
         </div>
         {rightPanel && (
-          <div className="w-[280px] border-l border-[#1e1e1e] flex-shrink-0 overflow-y-auto p-4">
-            {rightPanel}
+          <div className="w-[360px] border-l border-[#1e1e1e] flex-shrink-0 flex flex-col">
+            <div className="flex justify-end px-4 pt-3 pb-2 border-b border-[#1e1e1e]">
+              <button
+                onClick={() => setExpanded(false)}
+                className="text-[#444444] hover:text-[#f5f5f0] text-xs transition-colors"
+                title="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 min-h-0 p-4">
+              {rightPanel}
+            </div>
           </div>
         )}
       </div>
