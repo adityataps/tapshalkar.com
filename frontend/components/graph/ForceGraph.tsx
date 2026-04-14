@@ -63,7 +63,7 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
   const graphData = useMemo(() => ({
     nodes: data.nodes.map((n) => ({ ...n })),
     links: data.edges.map((e) => ({ source: e.source, target: e.target, type: e.type, weight: e.weight })),
-  }), [data]);
+  }), [data.nodes, data.edges]);
 
   const activeSet = useMemo(() => new Set(activeNodeIds), [activeNodeIds]);
   const selectedSet = useMemo(() => new Set(selectedNodeIds), [selectedNodeIds]);
@@ -85,6 +85,11 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
       return activeSet.has(src) && activeSet.has(tgt) ? "#ef4444" : "#1e1e1e";
     },
     [activeSet]
+  );
+
+  const linkWidth = useCallback(
+    (link: object) => ((link as GraphEdge).weight ?? 1) * 1.5,
+    []
   );
 
   const nodeLabel = useCallback((node: GraphNode) => {
@@ -109,7 +114,7 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
           nodeRelSize={5}
           warmupTicks={150}
           linkColor={linkColor}
-          linkWidth={(link: object) => ((link as GraphEdge).weight ?? 1) * 1.5}
+          linkWidth={linkWidth}
           onNodeClick={onNodeClick as ((node: object) => void) | undefined}
         />
       )}
