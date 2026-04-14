@@ -108,8 +108,12 @@ async def run_chat_stream(
     system = SYSTEM_PROMPT_TEMPLATE.format(bio=bio)
     active_node_ids: set[str] = set()
     loop_messages = list(messages)
+    emitted_text = False
 
     for _ in range(MAX_TOOL_ITERATIONS):
+        if emitted_text:
+            yield f'data: {json.dumps({"type": "text", "delta": "\n\n"})}\n\n'
+
         async with client.messages.stream(
             model="claude-opus-4-6",
             max_tokens=1024,
@@ -118,6 +122,7 @@ async def run_chat_stream(
             messages=loop_messages,
         ) as stream:
             async for text in stream.text_stream:
+                emitted_text = True
                 yield f'data: {json.dumps({"type": "text", "delta": text})}\n\n'
             message = await stream.get_final_message()
 
