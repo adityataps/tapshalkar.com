@@ -67,11 +67,14 @@ export default function Home() {
             {[
               { label: "github", href: "https://github.com/adityataps" },
               { label: "linkedin", href: "https://linkedin.com/in/adityatapshalkar" },
+              { label: "resume", href: "/Resume_Aditya_Tapshalkar.pdf" },
               { label: "writing", href: "/blog" },
             ].map(({ label, href }) => (
               <a
                 key={label}
                 href={href}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="font-mono text-xs border border-[#1e1e1e] text-[#444444] hover:text-[#ef4444] hover:border-[#ef4444] transition-colors px-3 py-1.5"
               >
                 {label}

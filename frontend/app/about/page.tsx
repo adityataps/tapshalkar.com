@@ -39,6 +39,8 @@ export default function About() {
           <a
             key={label}
             href={href}
+            target="_blank"
+            rel="noopener noreferrer"
             className="font-mono text-xs border border-[#1e1e1e] text-[#444444] hover:text-[#ef4444] hover:border-[#ef4444] transition-colors px-3 py-1.5"
           >
             {label}
