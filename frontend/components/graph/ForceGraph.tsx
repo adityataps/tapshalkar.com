@@ -4,7 +4,7 @@ import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import { GraphNode, GraphEdge, GraphData, NODE_COLORS } from "./types";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { forceX, forceY } = require("d3-force-3d");
+const { forceX, forceY, forceCollide } = require("d3-force-3d");
 
 export type { GraphNode, GraphEdge, GraphData };
 export { NODE_COLORS };
@@ -42,6 +42,8 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
     if (!fg) return;
     fg.d3Force("x", forceX(0).strength(0.04));
     fg.d3Force("y", forceY(0).strength(0.04));
+    fg.d3Force("charge")?.strength(-60);
+    fg.d3Force("collide", forceCollide(14));
   }, [dimensions.width]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const graphData = useMemo(() => ({
@@ -128,7 +130,7 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
           nodeCanvasObject={nodeCanvasObject}
           nodeCanvasObjectMode={() => "replace"}
           nodeRelSize={5}
-          warmupTicks={150}
+          warmupTicks={300}
           linkColor={linkColor}
           linkWidth={linkWidth}
           onNodeClick={onNodeClick as ((node: object) => void) | undefined}
