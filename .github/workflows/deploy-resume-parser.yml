@@ -42,6 +42,7 @@ jobs:
             --source=jobs/resume-parser/ \
             --entry-point=parse_resume \
             --trigger-topic="$RESUME_UPLOADS_TOPIC" \
+            --trigger-service-account="$RESUME_PARSER_SA" \
             --service-account="$RESUME_PARSER_SA" \
             --set-env-vars="DOCUMENT_AI_PROCESSOR_NAME=$DOCUMENT_AI_PROCESSOR_NAME" \
             --no-allow-unauthenticated \

@@ -92,6 +92,13 @@ resource "google_project_iam_member" "resume_parser_documentai" {
   member  = "serviceAccount:${google_service_account.resume_parser.email}"
 }
 
+# resume-parser SA: invoke the Cloud Run service backing the function
+resource "google_project_iam_member" "resume_parser_run_invoker" {
+  project = var.project_id
+  role    = "roles/run.invoker"
+  member  = "serviceAccount:${google_service_account.resume_parser.email}"
+}
+
 # GitHub Actions SA: deploy Cloud Functions Gen2
 resource "google_project_iam_member" "github_cloudfunctions_admin" {
   project = var.project_id

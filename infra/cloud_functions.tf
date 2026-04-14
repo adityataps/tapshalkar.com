@@ -33,6 +33,8 @@ resource "google_pubsub_topic" "resume_uploads" {
   name = "resume-uploads"
 }
 
+data "google_project" "project" {}
+
 # Fetch the GCS service account for this project — used to grant Pub/Sub publish rights
 data "google_storage_project_service_account" "gcs_account" {}
 
@@ -40,6 +42,14 @@ resource "google_pubsub_topic_iam_member" "gcs_publisher" {
   topic  = google_pubsub_topic.resume_uploads.name
   role   = "roles/pubsub.publisher"
   member = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
+}
+
+# Allow the Pub/Sub service agent to create OIDC tokens for the trigger SA,
+# so the push subscription can authenticate to the Cloud Run endpoint.
+resource "google_service_account_iam_member" "pubsub_token_creator" {
+  service_account_id = google_service_account.resume_parser.name
+  role               = "roles/iam.serviceAccountTokenCreator"
+  member             = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-pubsub.iam.gserviceaccount.com"
 }
 
 # GCS notification — only fires for the resume PDF
