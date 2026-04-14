@@ -21,7 +21,7 @@ resource "google_project_service" "documentai" {
 
 resource "google_document_ai_processor" "resume_ocr" {
   display_name = "resume-parser"
-  type         = "DOCUMENT_OCR_PROCESSOR"
+  type         = "OCR_PROCESSOR"
   location     = "us"
 
   depends_on = [google_project_service.documentai]
