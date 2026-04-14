@@ -64,3 +64,10 @@ resource "google_project_iam_member" "github_compute_admin" {
   role    = "roles/compute.networkAdmin"
   member  = "serviceAccount:${google_service_account.github_actions.email}"
 }
+
+# Backend SA: call Model Armor API
+resource "google_project_iam_member" "backend_model_armor" {
+  project = var.project_id
+  role    = "roles/modelarmor.user"
+  member  = "serviceAccount:${google_service_account.backend.email}"
+}
