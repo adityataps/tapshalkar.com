@@ -29,6 +29,12 @@ export default function Home() {
     setSelectedNodes([]); // agent response clears user selection
   };
 
+  const handleNewChat = () => {
+    setMessages([]);
+    setActiveNodeIds([]);
+    setSelectedNodes([]);
+  };
+
   const chatProps = {
     onActiveNodesChange: handleActiveNodesChange,
     selectedNodes,
@@ -36,6 +42,7 @@ export default function Home() {
     onDeselectNode: handleDeselectNode,
     messages,
     onMessagesChange: setMessages,
+    onNewChat: handleNewChat,
   };
 
   return (

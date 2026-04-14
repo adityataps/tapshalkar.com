@@ -19,6 +19,7 @@ interface Props {
   onDeselectNode?: (id: string) => void;
   messages?: Message[];
   onMessagesChange?: (msgs: Message[]) => void;
+  onNewChat?: () => void;
 }
 
 export default function ChatPanel({
@@ -28,6 +29,7 @@ export default function ChatPanel({
   onDeselectNode,
   messages: propMessages,
   onMessagesChange,
+  onNewChat,
 }: Props) {
   const [internalMessages, setInternalMessages] = useState<Message[]>([]);
   const messages = propMessages ?? internalMessages;
@@ -128,9 +130,19 @@ export default function ChatPanel({
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      <p className="font-mono text-[#ef4444] text-xs tracking-[0.2em] uppercase">
-        ask me anything
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="font-mono text-[#ef4444] text-xs tracking-[0.2em] uppercase">
+          ask me anything
+        </p>
+        {messages.length > 0 && onNewChat && (
+          <button
+            onClick={onNewChat}
+            className="font-mono text-[#444444] hover:text-[#f5f5f0] text-[9px] tracking-[0.15em] uppercase transition-colors"
+          >
+            new chat
+          </button>
+        )}
+      </div>
 
       {showSuggestions && <SuggestedPrompts onSelect={sendMessage} />}
 
