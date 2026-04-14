@@ -34,3 +34,13 @@ output "wif_provider" {
   description = "WIF provider resource name — used in GitHub Actions workflows"
   value       = google_iam_workload_identity_pool_provider.github.name
 }
+
+output "resume_parser_sa_email" {
+  description = "resume-parser Cloud Function service account — set as RESUME_PARSER_SA GitHub Actions variable"
+  value       = google_service_account.resume_parser.email
+}
+
+output "document_ai_processor_name" {
+  description = "Full Document AI processor resource name — set as DOCUMENT_AI_PROCESSOR_NAME GitHub Actions variable"
+  value       = "projects/${var.project_id}/locations/us/processors/${google_document_ai_processor.resume_ocr.id}"
+}

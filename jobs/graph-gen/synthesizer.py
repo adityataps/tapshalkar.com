@@ -127,6 +127,7 @@ async def synthesize_graph(
     health: HealthSummary,
     api_key: str,
     bio: str = "",
+    resume: str = "",
 ) -> GraphOutput:
     context = {
         "github": {
@@ -166,6 +167,7 @@ async def synthesize_graph(
             "last_workout": f"{health.last_workout_type} {health.last_workout_duration_min}min" if health.last_workout_type else None,
         },
         "bio": bio,
+        "resume": resume,
     }
 
     client = anthropic.Anthropic(api_key=api_key)

@@ -71,3 +71,30 @@ resource "google_project_iam_member" "backend_model_armor" {
   role    = "roles/modelarmor.user"
   member  = "serviceAccount:${google_service_account.backend.email}"
 }
+
+# Service account for the resume-parser Cloud Function
+resource "google_service_account" "resume_parser" {
+  account_id   = "resume-parser-sa"
+  display_name = "Resume Parser Cloud Function Service Account"
+}
+
+# resume-parser SA: read/write objects in the static-site bucket
+resource "google_project_iam_member" "resume_parser_gcs" {
+  project = var.project_id
+  role    = "roles/storage.objectAdmin"
+  member  = "serviceAccount:${google_service_account.resume_parser.email}"
+}
+
+# resume-parser SA: call Document AI
+resource "google_project_iam_member" "resume_parser_documentai" {
+  project = var.project_id
+  role    = "roles/documentai.apiUser"
+  member  = "serviceAccount:${google_service_account.resume_parser.email}"
+}
+
+# GitHub Actions SA: deploy Cloud Functions Gen2
+resource "google_project_iam_member" "github_cloudfunctions_admin" {
+  project = var.project_id
+  role    = "roles/cloudfunctions.admin"
+  member  = "serviceAccount:${google_service_account.github_actions.email}"
+}

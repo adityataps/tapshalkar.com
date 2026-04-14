@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from models import ActivityFeed, ActivityItem, NowSnapshot
 from sources.bio import load_bio
+from sources.resume import fetch_resume
 from sources.github import fetch_github
 from sources.spotify import fetch_spotify
 from sources.steam import fetch_steam
@@ -53,7 +54,7 @@ async def run():
         print("No bio.md found — skipping bio context")
 
     print("Fetching sources in parallel...")
-    github, spotify, steam, health = await asyncio.gather(
+    github, spotify, steam, health, resume = await asyncio.gather(
         fetch_github(username=os.environ["GITHUB_USERNAME"], token=os.environ["GITHUB_TOKEN"]),
         fetch_spotify(
             client_id=os.environ["SPOTIFY_CLIENT_ID"],
@@ -62,6 +63,7 @@ async def run():
         ),
         fetch_steam(api_key=os.environ["STEAM_API_KEY"], user_id=os.environ["STEAM_USER_ID"]),
         fetch_apple_health(bucket_name=bucket, prefix=health_prefix),
+        fetch_resume(bucket_name=bucket),
     )
 
     trakt = TraktData(history=[], watchlist=[], watching=None)
@@ -83,7 +85,7 @@ async def run():
     graph = await synthesize_graph(
         github=github, spotify=spotify, steam=steam,
         trakt=trakt, health=health, api_key=api_key,
-        bio=bio,
+        bio=bio, resume=resume,
     )
     print(f"Graph: {len(graph.nodes)} nodes, {len(graph.edges)} edges")
 

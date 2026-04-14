@@ -1,0 +1,51 @@
+name: Deploy Resume Parser
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "jobs/resume-parser/**"
+      - ".github/workflows/deploy-resume-parser.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.WIF_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy Cloud Function
+        env:
+          GCP_REGION: ${{ vars.GCP_REGION }}
+          GCS_BUCKET: ${{ vars.GCS_BUCKET }}
+          RESUME_PARSER_SA: ${{ vars.RESUME_PARSER_SA }}
+          DOCUMENT_AI_PROCESSOR_NAME: ${{ vars.DOCUMENT_AI_PROCESSOR_NAME }}
+          GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
+        run: |
+          gcloud functions deploy resume-parser \
+            --gen2 \
+            --runtime=python312 \
+            --region="$GCP_REGION" \
+            --source=jobs/resume-parser/ \
+            --entry-point=parse_resume \
+            --trigger-event-filters="type=google.cloud.storage.object.v1.finalized" \
+            --trigger-event-filters="bucket=$GCS_BUCKET" \
+            --service-account="$RESUME_PARSER_SA" \
+            --set-env-vars="DOCUMENT_AI_PROCESSOR_NAME=$DOCUMENT_AI_PROCESSOR_NAME" \
+            --no-allow-unauthenticated \
+            --memory=512Mi \
+            --timeout=120s \
+            --project="$GCP_PROJECT_ID"
