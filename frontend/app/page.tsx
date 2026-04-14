@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import GraphPanel from "@/components/graph/GraphPanel";
-import ChatPanel from "@/components/chat/ChatPanel";
+import ChatPanel, { type Message } from "@/components/chat/ChatPanel";
 import type { GraphNode } from "@/components/graph/types";
 
 export default function Home() {
   const [activeNodeIds, setActiveNodeIds] = useState<string[]>([]);
   const [selectedNodes, setSelectedNodes] = useState<GraphNode[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const handleNodeSelect = (node: GraphNode) => {
     setSelectedNodes((prev) =>
@@ -33,6 +34,8 @@ export default function Home() {
     selectedNodes,
     onClearSelectedNodes: handleClearSelectedNodes,
     onDeselectNode: handleDeselectNode,
+    messages,
+    onMessagesChange: setMessages,
   };
 
   return (

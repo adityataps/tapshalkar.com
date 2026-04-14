@@ -7,7 +7,7 @@ import SuggestedPrompts from "./SuggestedPrompts";
 import NodeChip from "./NodeChip";
 import type { GraphNode } from "@/components/graph/types";
 
-interface Message {
+export interface Message {
   role: "user" | "assistant";
   content: string;
 }
@@ -17,6 +17,8 @@ interface Props {
   selectedNodes?: GraphNode[];
   onClearSelectedNodes?: () => void;
   onDeselectNode?: (id: string) => void;
+  messages?: Message[];
+  onMessagesChange?: (msgs: Message[]) => void;
 }
 
 export default function ChatPanel({
@@ -24,8 +26,17 @@ export default function ChatPanel({
   selectedNodes = [],
   onClearSelectedNodes,
   onDeselectNode,
+  messages: propMessages,
+  onMessagesChange,
 }: Props) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [internalMessages, setInternalMessages] = useState<Message[]>([]);
+  const messages = propMessages ?? internalMessages;
+  const setMessages = onMessagesChange
+    ? (updater: Message[] | ((prev: Message[]) => Message[])) => {
+        const next = typeof updater === "function" ? updater(messages) : updater;
+        onMessagesChange(next);
+      }
+    : setInternalMessages;
   const [streamingContent, setStreamingContent] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const threadRef = useRef<HTMLDivElement>(null);
