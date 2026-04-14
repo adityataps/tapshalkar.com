@@ -45,7 +45,8 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
   useEffect(() => {
     if (!agentZoomTrigger || activeNodeIds.length === 0) return;
     const t = setTimeout(() => {
-      graphRef.current?.zoomToFit(600, 150, (node) => activeNodeIds.includes((node as GraphNode).id));
+      const padding = activeNodeIds.length === 1 ? 280 : 150;
+      graphRef.current?.zoomToFit(600, padding, (node) => activeNodeIds.includes((node as GraphNode).id));
     }, 150);
     return () => clearTimeout(t);
   }, [agentZoomTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
