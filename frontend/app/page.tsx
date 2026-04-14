@@ -1,9 +1,12 @@
-import GraphPanel from "@/components/graph/GraphPanel";
+"use client";
 
-// NOTE: page.tsx is a server component but does NOT fetch the graph.
-// GraphPanel fetches client-side on mount — this is intentional to satisfy
-// the static export constraint (no API calls during `next build`).
+import { useState } from "react";
+import GraphPanel from "@/components/graph/GraphPanel";
+import ChatPanel from "@/components/chat/ChatPanel";
+
 export default function Home() {
+  const [activeNodeIds, setActiveNodeIds] = useState<string[]>([]);
+
   return (
     <div className="min-h-screen">
       {/* Split hero */}
@@ -39,14 +42,19 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Right: graph — fetches /api/graph client-side */}
+        {/* Right: graph */}
         <div className="h-[420px] lg:h-[500px]">
-          <GraphPanel />
+          <GraphPanel activeNodeIds={activeNodeIds} />
         </div>
       </section>
 
       {/* Divider */}
       <div className="border-t border-[#1e1e1e]" />
+
+      {/* Chat section */}
+      <section className="mx-auto max-w-6xl px-6 py-16">
+        <ChatPanel onActiveNodesChange={setActiveNodeIds} />
+      </section>
     </div>
   );
 }
