@@ -134,6 +134,7 @@ async def run_chat_stream(
                 max_tokens=1024,
                 system=system,
                 tools=[SEARCH_GRAPH_TOOL, GET_ACTIVITY_TOOL, GET_RESUME_TOOL],
+                tool_choice={"type": "tool", "name": "search_knowledge_graph"} if _ == 0 else {"type": "auto"},
                 messages=loop_messages,
             ) as stream:
                 async for text in stream.text_stream:

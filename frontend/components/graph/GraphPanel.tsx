@@ -41,6 +41,14 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
 
   const handleReset = () => graphRef.current?.zoomToFit(400);
 
+  useEffect(() => {
+    if (activeNodeIds.length === 0) return;
+    const t = setTimeout(() => {
+      graphRef.current?.zoomToFit(600, 80, (node) => activeNodeIds.includes((node as GraphNode).id));
+    }, 150);
+    return () => clearTimeout(t);
+  }, [activeNodeIds]);
+
   const nodeEdgeCount = data.nodes.length > 0 && (
     <div className="absolute bottom-4 right-4 z-10 font-mono text-[#333333] text-[9px] tracking-[0.12em] select-none">
       {data.nodes.length} nodes · {data.edges.length} edges
