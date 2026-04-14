@@ -32,6 +32,15 @@ GET_ACTIVITY_TOOL = {
     "input_schema": {"type": "object", "properties": {}},
 }
 
+GET_RESUME_TOOL = {
+    "name": "get_resume",
+    "description": (
+        "Retrieve Aditya's full resume. Call this when answering questions about his work experience, "
+        "education, specific roles, companies, dates, degrees, or detailed career history."
+    ),
+    "input_schema": {"type": "object", "properties": {}},
+}
+
 SYSTEM_PROMPT_TEMPLATE = """\
 You are Aditya Tapshalkar's digital representative on his portfolio website.
 Answer questions about Aditya honestly and conversationally, drawing on his knowledge graph and personal bio.
@@ -82,6 +91,7 @@ async def run_chat_stream(
     graph: dict,
     bio: str,
     currently: dict,
+    resume: str,
     model_armor_template: str,
     api_key: str,
 ) -> AsyncGenerator[str, None]:
@@ -118,7 +128,7 @@ async def run_chat_stream(
             model="claude-opus-4-6",
             max_tokens=1024,
             system=system,
-            tools=[SEARCH_GRAPH_TOOL, GET_ACTIVITY_TOOL],
+            tools=[SEARCH_GRAPH_TOOL, GET_ACTIVITY_TOOL, GET_RESUME_TOOL],
             messages=loop_messages,
         ) as stream:
             async for text in stream.text_stream:
@@ -146,6 +156,8 @@ async def run_chat_stream(
                 content = json.dumps({"nodes": nodes, "related_edges": edges})
             elif tool_use.name == "get_current_activity":
                 content = json.dumps(currently)
+            elif tool_use.name == "get_resume":
+                content = resume if resume else "Resume not available."
             else:
                 content = "Unknown tool."
 

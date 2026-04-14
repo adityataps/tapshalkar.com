@@ -35,6 +35,13 @@ async def lifespan(app: FastAPI):
     except Exception:
         app.state.currently = {}
 
+    try:
+        app.state.resume = (
+            await gcs.fetch_object(settings.gcs_bucket, "resume_parsed.md")
+        ).decode()
+    except Exception:
+        app.state.resume = ""
+
     yield
 
 

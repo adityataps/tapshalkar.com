@@ -52,6 +52,7 @@ async def chat(request: Request, body: ChatRequest) -> StreamingResponse:
             graph=request.app.state.graph,
             bio=request.app.state.bio,
             currently=request.app.state.currently,
+            resume=request.app.state.resume,
             model_armor_template=settings.model_armor_template,
             api_key=settings.anthropic_api_key,
         ):
