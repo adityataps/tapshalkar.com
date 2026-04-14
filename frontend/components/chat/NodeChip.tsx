@@ -19,14 +19,14 @@ export default function NodeChip({ node, onRemove }: Props) {
         <span>{node.label}</span>
         <button
           onClick={() => onRemove(node.id)}
-          className="text-[#444444] hover:text-[#f5f5f0] leading-none ml-0.5"
+          className="text-[#444444] hover:text-[#f5f5f0] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[#22d3ee] leading-none ml-0.5"
           aria-label={`Remove ${node.label}`}
         >
           ×
         </button>
       </div>
       {node.description && (
-        <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-20 w-44 bg-[#111111] border border-[#333333] text-[#999999] font-mono text-[8px] leading-relaxed px-2 py-1.5 pointer-events-none">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-20 w-44 bg-[#111111] border border-[#333333] text-[#999999] font-mono text-[8px] leading-relaxed px-2 py-1.5 pointer-events-none">
           {node.description}
         </div>
       )}
