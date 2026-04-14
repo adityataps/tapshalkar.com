@@ -2,7 +2,7 @@ const socials = [
   { label: "github", href: "https://github.com/adityataps" },
   { label: "linkedin", href: "https://linkedin.com/in/adityatapshalkar" },
   { label: "email", href: "mailto:aditya@tapshalkar.com" },
-  { label: "resume", href: "/resume.pdf" },
+  { label: "resume", href: "/Resume_Aditya_Tapshalkar.pdf" },
 ];
 
 export default function About() {
