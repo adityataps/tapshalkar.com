@@ -44,14 +44,6 @@ resource "google_pubsub_topic_iam_member" "gcs_publisher" {
   member = "serviceAccount:${data.google_storage_project_service_account.gcs_account.email_address}"
 }
 
-# Allow the Document AI service agent to read from the GCS bucket when
-# processing documents passed as GCS URIs.
-resource "google_storage_bucket_iam_member" "documentai_gcs_reader" {
-  bucket = google_storage_bucket.static_site.name
-  role   = "roles/storage.objectViewer"
-  member = "serviceAccount:service-${data.google_project.project.number}@gcp-sa-documentai.iam.gserviceaccount.com"
-}
-
 # Allow the Pub/Sub service agent to create OIDC tokens for the trigger SA,
 # so the push subscription can authenticate to the Cloud Run endpoint.
 resource "google_service_account_iam_member" "pubsub_token_creator" {

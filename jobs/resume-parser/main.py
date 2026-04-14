@@ -55,21 +55,30 @@ def parse_resume(cloud_event):
         print(f"Ignoring {file_name}")
         return
 
-    gcs_uri = f"gs://{bucket_name}/{file_name}"
-    print(f"Parsing {gcs_uri}")
-
     processor_name = os.environ["DOCUMENT_AI_PROCESSOR_NAME"]
-    print(f"Processor: {processor_name}")
-    location = processor_name.split("/")[3]
+    # Validate expected format: projects/{project}/locations/{location}/processors/{id}
+    parts = processor_name.split("/")
+    if len(parts) != 6 or parts[0] != "projects" or parts[2] != "locations" or parts[4] != "processors":
+        raise ValueError(
+            f"DOCUMENT_AI_PROCESSOR_NAME has unexpected format: {processor_name!r}\n"
+            "Expected: projects/PROJECT/locations/LOCATION/processors/PROCESSOR_ID"
+        )
+
+    location = parts[3]
+    print(f"Parsing gs://{bucket_name}/{file_name} with processor {processor_name}")
+
+    storage_client = storage.Client()
+    pdf_bytes = storage_client.bucket(bucket_name).blob(file_name).download_as_bytes()
+    print(f"Downloaded {len(pdf_bytes)} bytes")
+
     opts = ClientOptions(api_endpoint=f"{location}-documentai.googleapis.com")
     docai_client = documentai.DocumentProcessorServiceClient(client_options=opts)
 
-    # Pass a GCS reference — avoids inline size limits and works well with Layout Parser
     result = docai_client.process_document(
         request=documentai.ProcessRequest(
             name=processor_name,
-            gcs_document=documentai.GcsDocument(
-                gcs_uri=gcs_uri,
+            raw_document=documentai.RawDocument(
+                content=pdf_bytes,
                 mime_type="application/pdf",
             ),
         )
@@ -85,7 +94,6 @@ def parse_resume(cloud_event):
         body = doc.text
         print(f"No layout blocks — falling back to plain text ({len(body)} chars)")
 
-    storage_client = storage.Client()
     output = f"# Resume — Aditya Tapshalkar\n\n{body}"
     storage_client.bucket(bucket_name).blob(OUTPUT_FILENAME).upload_from_string(
         output, content_type="text/plain; charset=utf-8"
