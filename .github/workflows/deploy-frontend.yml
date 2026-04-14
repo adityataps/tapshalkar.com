@@ -58,9 +58,8 @@ jobs:
             ! -name "index.html" ! -name "404.html" ! -name "_not-found.html" \
             -printf '%P\n' | while IFS= read -r rel; do
               clean="${rel%.html}"
-              gsutil cp "out/$rel" "gs://${{ vars.GCS_BUCKET }}/$clean"
-              gsutil setmeta -h "Content-Type:text/html;charset=utf-8" \
-                "gs://${{ vars.GCS_BUCKET }}/$clean"
+              gsutil -h "Content-Type:text/html;charset=utf-8" \
+                cp "out/$rel" "gs://${{ vars.GCS_BUCKET }}/$clean"
           done
 
       - name: Invalidate CDN cache
