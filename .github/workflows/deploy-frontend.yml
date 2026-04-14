@@ -49,6 +49,19 @@ jobs:
         run: |
           gsutil -m rsync -r -d -x '^(graph|activity-feed|now|currently)\.json$|^Resume_Aditya_Tapshalkar\.pdf$' out/ gs://${{ vars.GCS_BUCKET }}/
 
+      - name: Publish clean URLs
+        # GCS CDN backend does not infer .html extensions — copy each page to an
+        # extensionless path so /about works as well as /about.html.
+        run: |
+          find out -name "*.html" \
+            ! -name "index.html" ! -name "404.html" ! -name "_not-found.html" \
+            -printf '%P\n' | while IFS= read -r rel; do
+              clean="${rel%.html}"
+              gsutil cp "out/$rel" "gs://${{ vars.GCS_BUCKET }}/$clean"
+              gsutil setmeta -h "Content-Type:text/html;charset=utf-8" \
+                "gs://${{ vars.GCS_BUCKET }}/$clean"
+          done
+
       - name: Invalidate CDN cache
         run: |
           gcloud compute url-maps invalidate-cdn-cache ${{ vars.CDN_URL_MAP }} \
