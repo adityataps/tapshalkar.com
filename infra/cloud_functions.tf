@@ -19,13 +19,16 @@ resource "google_project_service" "documentai" {
   disable_on_destroy = false
 }
 
-# Document AI OCR processor — parses the uploaded resume PDF
-# Location "us" is multiregional; the processor name is an output used
-# to set the DOCUMENT_AI_PROCESSOR_NAME GitHub Actions variable.
-resource "google_document_ai_processor" "resume_ocr" {
-  display_name = "resume-ocr"
-  type         = "LAYOUT_PARSER"
-  location     = "us"
-
-  depends_on = [google_project_service.documentai]
-}
+# Document AI processor is created manually (see below) — processor type
+# availability varies by location and is not reliably manageable via Terraform.
+#
+# To create the processor:
+#   gcloud ai document-ai processor-types list --location=us --project=PROJECT_ID
+# Pick a suitable type (e.g. LAYOUT_PARSER or DOCUMENT_OCR), then:
+#   gcloud ai document-ai processors create \
+#     --display-name=resume-parser \
+#     --type=LAYOUT_PARSER \
+#     --location=us \
+#     --project=PROJECT_ID
+# Copy the processor ID from the output and set the GitHub Actions variable:
+#   DOCUMENT_AI_PROCESSOR_NAME = projects/PROJECT_ID/locations/us/processors/PROCESSOR_ID

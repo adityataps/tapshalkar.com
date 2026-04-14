@@ -40,7 +40,6 @@ output "resume_parser_sa_email" {
   value       = google_service_account.resume_parser.email
 }
 
-output "document_ai_processor_name" {
-  description = "Full Document AI processor resource name — set as DOCUMENT_AI_PROCESSOR_NAME GitHub Actions variable"
-  value       = "projects/${var.project_id}/locations/us/processors/${google_document_ai_processor.resume_ocr.id}"
-}
+# document_ai_processor_name is not output here — the processor is created
+# manually via gcloud and its full resource name is set directly as the
+# DOCUMENT_AI_PROCESSOR_NAME GitHub Actions variable.
