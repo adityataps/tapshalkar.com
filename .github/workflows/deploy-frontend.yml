@@ -56,13 +56,22 @@ jobs:
         env:
           GCS_BUCKET: ${{ vars.GCS_BUCKET }}
         run: |
-          cd out
-          while IFS= read -r path; do
-            path="${path#./}"
-            clean="${path%.html}"
-            echo "  $path → gs://$GCS_BUCKET/$clean"
-            gsutil -h "Content-Type:text/html;charset=utf-8" cp "$path" "gs://$GCS_BUCKET/$clean"
-          done < <(find . -name "*.html" ! -name "index.html" ! -name "404.html" ! -name "_not-found.html")
+          python3 - <<'EOF'
+          import subprocess, os
+          from pathlib import Path
+          bucket = os.environ["GCS_BUCKET"]
+          skip = {"index.html", "404.html", "_not-found.html"}
+          for p in sorted(Path("out").rglob("*.html")):
+              if p.name in skip:
+                  continue
+              clean = str(p.relative_to("out").with_suffix(""))
+              print(f"  {p} → gs://{bucket}/{clean}")
+              subprocess.run(
+                  ["gsutil", "-h", "Content-Type:text/html;charset=utf-8",
+                   "cp", str(p), f"gs://{bucket}/{clean}"],
+                  check=True,
+              )
+          EOF
 
       - name: Invalidate CDN cache
         run: |
