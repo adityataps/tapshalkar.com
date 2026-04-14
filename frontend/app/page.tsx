@@ -81,13 +81,19 @@ export default function Home() {
         </div>
 
         {/* Right: graph */}
-        <div className="h-[420px] lg:h-[500px]">
+        <div className="h-[420px] lg:h-[500px] flex flex-col gap-2">
           <GraphPanel
             activeNodeIds={activeNodeIds}
             selectedNodeIds={selectedNodes.map((n) => n.id)}
             onNodeSelect={handleNodeSelect}
+            onDeselectAll={handleClearSelectedNodes}
             rightPanel={<ChatPanel {...chatProps} />}
           />
+          <p className="font-mono text-[#333333] text-[9px] tracking-[0.15em] text-right">
+            {selectedNodes.length > 0
+              ? `${selectedNodes.length} node${selectedNodes.length > 1 ? "s" : ""} selected — included as context`
+              : "click nodes to add context to your messages"}
+          </p>
         </div>
       </section>
 

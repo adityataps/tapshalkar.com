@@ -13,10 +13,11 @@ interface Props {
   activeNodeIds?: string[];
   selectedNodeIds?: string[];
   onNodeSelect?: (node: GraphNode) => void;
+  onDeselectAll?: () => void;
   rightPanel?: React.ReactNode;
 }
 
-export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], onNodeSelect, rightPanel }: Props) {
+export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], onNodeSelect, onDeselectAll, rightPanel }: Props) {
   const [data, setData] = useState<GraphData>(EMPTY_GRAPH);
   const [expanded, setExpanded] = useState(false);
   const graphRef = useRef<ForceGraphMethods | undefined>(undefined);
@@ -40,7 +41,7 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
   const handleReset = () => graphRef.current?.zoomToFit(400);
 
   const controls = (
-    <div className="absolute bottom-4 left-4 z-10 flex gap-2">
+    <div className="absolute bottom-4 left-4 z-10 flex gap-2 items-center">
       <button
         onClick={handleReset}
         className="text-[#444444] hover:text-[#f5f5f0] text-xs px-2 py-1 border border-[#444444] hover:border-[#f5f5f0] transition-colors"
@@ -55,6 +56,14 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
       >
         {expanded ? "⊠" : "⤢"}
       </button>
+      {selectedNodeIds.length > 0 && onDeselectAll && (
+        <button
+          onClick={onDeselectAll}
+          className="text-[#22d3ee] hover:text-[#f5f5f0] border border-[#22d3ee] hover:border-[#f5f5f0] font-mono text-[9px] px-2 py-1 tracking-[0.1em] transition-colors"
+        >
+          deselect all ({selectedNodeIds.length})
+        </button>
+      )}
     </div>
   );
 
