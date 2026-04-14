@@ -45,3 +45,17 @@ jobs:
             --region ${{ vars.GCP_REGION }} \
             --project ${{ vars.GCP_PROJECT_ID }} \
             --quiet
+
+      - name: Prune old Cloud Run revisions
+        run: |
+          gcloud run revisions list \
+            --service backend \
+            --region ${{ vars.GCP_REGION }} \
+            --project ${{ vars.GCP_PROJECT_ID }} \
+            --sort-by ~DEPLOYED \
+            --format "value(name)" \
+            | tail -n +6 \
+            | xargs -r -I{} gcloud run revisions delete {} \
+              --region ${{ vars.GCP_REGION }} \
+              --project ${{ vars.GCP_PROJECT_ID }} \
+              --quiet --async
