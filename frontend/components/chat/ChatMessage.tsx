@@ -1,3 +1,4 @@
+import ReactMarkdown from "react-markdown";
 import { NODE_COLORS } from "@/components/graph/types";
 
 interface ContextNode {
@@ -43,12 +44,28 @@ export default function ChatMessage({ role, content, isStreaming = false, contex
   return (
     <div className="flex gap-3 items-start">
       <span className="text-[#ef4444] font-mono text-xs mt-1 shrink-0">AT →</span>
-      <p className="text-[#f5f5f0] font-mono text-sm leading-relaxed">
-        {content}
+      <div className="text-[#f5f5f0] font-mono text-sm leading-relaxed prose-invert max-w-none
+        [&_strong]:font-bold [&_strong]:text-[#f5f5f0]
+        [&_em]:italic [&_em]:text-[#f5f5f0]
+        [&_a]:text-[#ef4444] [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-[#f5f5f0]
+        [&_code]:bg-[#1a1a1a] [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[#22d3ee] [&_code]:text-xs
+        [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:mt-1
+        [&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:mt-1
+        [&_li]:mt-0.5
+        [&_p]:mt-0 [&_p+p]:mt-2">
+        <ReactMarkdown
+          components={{
+            a: ({ href, children }) => (
+              <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>
+            ),
+          }}
+        >
+          {content}
+        </ReactMarkdown>
         {isStreaming && (
           <span className="text-[#ef4444] animate-pulse">▌</span>
         )}
-      </p>
+      </div>
     </div>
   );
 }

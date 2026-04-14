@@ -74,7 +74,7 @@ You may call fetch_github_readme for up to 3 repositories to get richer project 
 Once you have enough context, call emit_knowledge_graph with the final graph.
 
 IMPORTANT: The edges array must NOT be empty. Every node must connect to at least one other node.
-IMPORTANT: Emit 60-80 nodes total. More nodes = richer graph highlighting.
+IMPORTANT: Emit 80-120 nodes total. More nodes = richer graph highlighting.
 
 Node rules:
 - Node IDs: stable snake_case prefixed by type (e.g. skill-python, project-ml-tool)

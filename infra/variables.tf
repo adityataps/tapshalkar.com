@@ -22,7 +22,7 @@ variable "github_repo" {
 variable "graph_gen_schedule" {
   description = "Cron schedule for the graph-gen job"
   type        = string
-  default     = "0 6 * * *"
+  default     = "0 6 * * 0"
 }
 
 variable "github_username" {

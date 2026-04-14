@@ -110,20 +110,16 @@ async def run_chat_stream(
     loop_messages = list(messages)
 
     for _ in range(MAX_TOOL_ITERATIONS):
-        message = await client.messages.create(
+        async with client.messages.stream(
             model="claude-opus-4-6",
             max_tokens=1024,
             system=system,
             tools=[SEARCH_GRAPH_TOOL, GET_ACTIVITY_TOOL],
             messages=loop_messages,
-        )
-
-        # Stream text content to client
-        for block in message.content:
-            if block.type == "text" and block.text:
-                # Yield word by word for streaming feel
-                for word in block.text.split():
-                    yield f'data: {json.dumps({"type": "text", "delta": word + " "})}\n\n'
+        ) as stream:
+            async for text in stream.text_stream:
+                yield f'data: {json.dumps({"type": "text", "delta": text})}\n\n'
+            message = await stream.get_final_message()
 
         tool_use_blocks = [b for b in message.content if b.type == "tool_use"]
 

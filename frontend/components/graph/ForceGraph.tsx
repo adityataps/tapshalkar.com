@@ -42,8 +42,8 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
   const selectedSet = useMemo(() => new Set(selectedNodeIds), [selectedNodeIds]);
 
   const nodeColor = useCallback(
-    (node: GraphNode) => activeSet.has(node.id) ? "#ef4444" : (NODE_COLORS[node.type] ?? "#888"),
-    [activeSet]
+    (node: GraphNode) => NODE_COLORS[node.type] ?? "#888",
+    []
   );
 
   const nodeCanvasObject = useCallback(
@@ -53,15 +53,26 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
       const x = n.x ?? 0;
       const y = n.y ?? 0;
 
+      // Always fill with type color
       ctx.beginPath();
       ctx.arc(x, y, r, 0, 2 * Math.PI);
-      ctx.fillStyle = activeSet.has(n.id) ? "#ef4444" : (NODE_COLORS[n.type] ?? "#888");
+      ctx.fillStyle = NODE_COLORS[n.type] ?? "#888";
       ctx.fill();
 
+      // Cyan ring for user-selected nodes
       if (selectedSet.has(n.id)) {
         ctx.beginPath();
         ctx.arc(x, y, r + 2.5, 0, 2 * Math.PI);
         ctx.strokeStyle = "#22d3ee";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // Red ring for agent-referenced nodes
+      if (activeSet.has(n.id)) {
+        ctx.beginPath();
+        ctx.arc(x, y, r + 2.5, 0, 2 * Math.PI);
+        ctx.strokeStyle = "#ef4444";
         ctx.lineWidth = 1.5;
         ctx.stroke();
       }
