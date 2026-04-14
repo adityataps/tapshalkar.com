@@ -170,8 +170,10 @@ export default function ChatPanel({
         </div>
       )}
 
+      <ChatInput onSend={sendMessage} disabled={isStreaming} />
+
       {selectedNodes.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 pt-2 border-t border-[#1e1e1e]">
+        <div className="flex flex-wrap gap-1.5">
           {selectedNodes.map((node) => (
             <NodeChip
               key={node.id}
@@ -181,8 +183,6 @@ export default function ChatPanel({
           ))}
         </div>
       )}
-
-      <ChatInput onSend={sendMessage} disabled={isStreaming} />
     </div>
   );
 }
