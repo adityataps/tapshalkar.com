@@ -2,6 +2,8 @@ resource "google_model_armor_template" "chat_shield" {
   location    = var.region
   template_id = "chat-shield"
 
+  template_metadata {}
+
   filter_config {
     rai_settings {
       rai_filters {

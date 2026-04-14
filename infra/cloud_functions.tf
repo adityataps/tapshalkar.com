@@ -24,7 +24,7 @@ resource "google_project_service" "documentai" {
 # to set the DOCUMENT_AI_PROCESSOR_NAME GitHub Actions variable.
 resource "google_document_ai_processor" "resume_ocr" {
   display_name = "resume-ocr"
-  type         = "OCR"
+  type         = "DOCUMENT_OCR"
   location     = "us"
 
   depends_on = [google_project_service.documentai]
