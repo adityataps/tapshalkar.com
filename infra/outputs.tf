@@ -40,6 +40,11 @@ output "resume_parser_sa_email" {
   value       = google_service_account.resume_parser.email
 }
 
+output "resume_uploads_topic" {
+  description = "Pub/Sub topic name for resume upload notifications — set as RESUME_UPLOADS_TOPIC GitHub Actions variable"
+  value       = google_pubsub_topic.resume_uploads.name
+}
+
 output "document_ai_processor_name" {
   description = "Full Document AI processor resource name — set as DOCUMENT_AI_PROCESSOR_NAME GitHub Actions variable"
   value       = "projects/${var.project_id}/locations/us/processors/${google_document_ai_processor.resume_ocr.id}"

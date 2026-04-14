@@ -1,3 +1,5 @@
+import base64
+import json
 import os
 import functions_framework
 from google.api_core.client_options import ClientOptions
@@ -43,9 +45,11 @@ def _blocks_to_markdown(blocks) -> str:
 
 @functions_framework.cloud_event
 def parse_resume(cloud_event):
-    data = cloud_event.data
-    bucket_name = data["bucket"]
-    file_name = data["name"]
+    # Triggered via Pub/Sub topic — unwrap the GCS notification from the message
+    raw = base64.b64decode(cloud_event.data["message"]["data"]).decode("utf-8")
+    gcs_event = json.loads(raw)
+    bucket_name = gcs_event["bucket"]
+    file_name = gcs_event["name"]
 
     if file_name != RESUME_FILENAME:
         print(f"Ignoring {file_name}")

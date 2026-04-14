@@ -26,3 +26,29 @@ resource "google_document_ai_processor" "resume_ocr" {
 
   depends_on = [google_project_service.documentai]
 }
+
+# Pub/Sub topic — bridges the multi-region GCS bucket to the single-region
+# Cloud Function. Eventarc can't cross that boundary directly.
+data "google_project" "project" {}
+
+resource "google_pubsub_topic" "resume_uploads" {
+  name = "resume-uploads"
+}
+
+# GCS service account needs publish rights on the topic
+resource "google_pubsub_topic_iam_member" "gcs_publisher" {
+  topic  = google_pubsub_topic.resume_uploads.name
+  role   = "roles/pubsub.publisher"
+  member = "serviceAccount:service-${data.google_project.project.number}@gs-project-accounts.iam.gserviceaccount.com"
+}
+
+# GCS notification — only fires for the resume PDF
+resource "google_storage_notification" "resume_upload" {
+  bucket             = google_storage_bucket.static_site.name
+  payload_format     = "JSON_API_V1"
+  topic              = google_pubsub_topic.resume_uploads.id
+  event_types        = ["OBJECT_FINALIZE"]
+  object_name_prefix = "Resume_Aditya_Tapshalkar"
+
+  depends_on = [google_pubsub_topic_iam_member.gcs_publisher]
+}

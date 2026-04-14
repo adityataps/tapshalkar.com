@@ -30,8 +30,8 @@ jobs:
       - name: Deploy Cloud Function
         env:
           GCP_REGION: ${{ vars.GCP_REGION }}
-          GCS_BUCKET: ${{ vars.GCS_BUCKET }}
           RESUME_PARSER_SA: ${{ vars.RESUME_PARSER_SA }}
+          RESUME_UPLOADS_TOPIC: ${{ vars.RESUME_UPLOADS_TOPIC }}
           DOCUMENT_AI_PROCESSOR_NAME: ${{ vars.DOCUMENT_AI_PROCESSOR_NAME }}
           GCP_PROJECT_ID: ${{ vars.GCP_PROJECT_ID }}
         run: |
@@ -41,8 +41,7 @@ jobs:
             --region="$GCP_REGION" \
             --source=jobs/resume-parser/ \
             --entry-point=parse_resume \
-            --trigger-event-filters="type=google.cloud.storage.object.v1.finalized" \
-            --trigger-event-filters="bucket=$GCS_BUCKET" \
+            --trigger-topic="$RESUME_UPLOADS_TOPIC" \
             --service-account="$RESUME_PARSER_SA" \
             --set-env-vars="DOCUMENT_AI_PROCESSOR_NAME=$DOCUMENT_AI_PROCESSOR_NAME" \
             --no-allow-unauthenticated \
