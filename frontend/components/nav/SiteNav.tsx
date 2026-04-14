@@ -7,10 +7,10 @@ export default function SiteNav() {
         ~/Aditya-Tapshalkar
       </a>
       <div className="flex gap-6">
-        <a href="#about" className="text-[#444444] hover:text-[#f5f5f0] text-sm transition-colors">
+        <a href="#about" className="text-[#777777] hover:text-[#f5f5f0] text-sm transition-colors">
           About
         </a>
-        <a href="#writing" className="text-[#444444] hover:text-[#f5f5f0] text-sm transition-colors">
+        <a href="#writing" className="text-[#777777] hover:text-[#f5f5f0] text-sm transition-colors">
           Writing
         </a>
       </div>

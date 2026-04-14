@@ -23,7 +23,7 @@ export default function Nav() {
               key={href}
               href={href}
               className={`font-mono text-xs tracking-widest uppercase transition-colors ${
-                pathname.startsWith(href) ? "text-[#ef4444]" : "text-[#444444] hover:text-[#f5f5f0]"
+                pathname.startsWith(href) ? "text-[#ef4444]" : "text-[#777777] hover:text-[#f5f5f0]"
               }`}
             >
               {label}

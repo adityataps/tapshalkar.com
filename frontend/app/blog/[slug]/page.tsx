@@ -14,18 +14,18 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
   return (
     <article className="mx-auto max-w-2xl px-6 py-16">
-      <p className="font-mono text-[#444444] text-xs mb-2">{post.date} · {readTime} min read</p>
+      <p className="font-mono text-[#777777] text-xs mb-2">{post.date} · {readTime} min read</p>
       <h1 className="font-serif text-4xl font-bold text-[#f5f5f0] mb-4">{post.title}</h1>
       <div className="flex gap-2 mb-10">
         {post.tags.map((tag) => (
-          <span key={tag} className="font-mono text-xs text-[#444444] border border-[#1e1e1e] px-2 py-0.5">
+          <span key={tag} className="font-mono text-xs text-[#777777] border border-[#1e1e1e] px-2 py-0.5">
             {tag}
           </span>
         ))}
       </div>
       <div className="prose prose-invert prose-sm max-w-none
         prose-headings:font-serif prose-headings:text-[#f5f5f0]
-        prose-p:text-[#444444] prose-p:leading-relaxed
+        prose-p:text-[#777777] prose-p:leading-relaxed
         prose-a:text-[#ef4444] prose-a:no-underline hover:prose-a:underline
         prose-code:text-[#ef4444] prose-code:font-mono prose-code:text-xs
         prose-pre:bg-[#111111] prose-pre:border prose-pre:border-[#1e1e1e]">

@@ -29,12 +29,12 @@ export default function ActivityFeed() {
 
   return (
     <div>
-      <p className="text-[#444444] text-xs uppercase tracking-widest mb-3">Recent activity</p>
+      <p className="text-[#777777] text-xs uppercase tracking-widest mb-3">Recent activity</p>
       <div className="flex flex-col gap-3">
         {events.slice(0, 8).map((event) => (
           <div key={event.id} className="flex flex-col gap-0.5">
             <div className="flex items-baseline gap-2">
-              <span className="text-[#444444] text-xs">{event.type}</span>
+              <span className="text-[#777777] text-xs">{event.type}</span>
               <a
                 href={event.repo_url}
                 target="_blank"
@@ -45,7 +45,7 @@ export default function ActivityFeed() {
               </a>
             </div>
             {event.message && (
-              <p className="text-[#444444] text-xs truncate">{event.message}</p>
+              <p className="text-[#777777] text-xs truncate">{event.message}</p>
             )}
           </div>
         ))}

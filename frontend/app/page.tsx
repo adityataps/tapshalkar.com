@@ -59,7 +59,7 @@ export default function Home() {
             I build systems<br />
             that <em className="text-[#ef4444] not-italic">think</em>.
           </h1>
-          <p className="text-[#444444] text-sm leading-relaxed max-w-sm mb-8">
+          <p className="text-[#777777] text-sm leading-relaxed max-w-sm mb-8">
             Exploring language models, knowledge systems, and real-world product.
             Currently based in Atlanta, GA.
           </p>
@@ -75,7 +75,7 @@ export default function Home() {
                 href={href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-mono text-xs border border-[#1e1e1e] text-[#444444] hover:text-[#ef4444] hover:border-[#ef4444] transition-colors px-3 py-1.5"
+                className="font-mono text-xs border border-[#1e1e1e] text-[#777777] hover:text-[#ef4444] hover:border-[#ef4444] transition-colors px-3 py-1.5"
               >
                 {label}
               </a>
@@ -92,7 +92,7 @@ export default function Home() {
             onDeselectAll={handleClearSelectedNodes}
             rightPanel={<ChatPanel {...chatProps} />}
           />
-          <p className="font-mono text-[#333333] text-[9px] tracking-[0.15em] text-right">
+          <p className="font-mono text-[#555555] text-[9px] tracking-[0.15em] text-right">
             {selectedNodes.length > 0
               ? `${selectedNodes.length} node${selectedNodes.length > 1 ? "s" : ""} selected — included as context`
               : "click nodes to add context to your messages"}
@@ -103,8 +103,8 @@ export default function Home() {
       {/* Scroll indicator */}
       <div className="flex justify-center pb-8 -mt-8">
         <div className="flex flex-col items-center gap-1 animate-bounce">
-          <span className="font-mono text-[#444444] text-[10px] tracking-[0.2em] uppercase">ask me</span>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-[#444444]">
+          <span className="font-mono text-[#777777] text-[10px] tracking-[0.2em] uppercase">ask me</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-[#777777]">
             <path d="M1 4l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         </div>

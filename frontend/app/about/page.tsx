@@ -10,7 +10,7 @@ export default function About() {
     <div className="mx-auto max-w-2xl px-6 py-16">
       <p className="font-mono text-[#ef4444] text-xs tracking-widest uppercase mb-8">~/about</p>
 
-      <div className="space-y-4 text-[#444444] text-sm leading-relaxed mb-12">
+      <div className="space-y-4 text-[#777777] text-sm leading-relaxed mb-12">
         <p>
           I&apos;m Aditya — an ML/AI engineer working at the intersection of language models,
           knowledge systems, and real-world product.
@@ -25,7 +25,7 @@ export default function About() {
             "homelab hobbyist",
             "dad of two cats",
           ].map((item) => (
-            <li key={item} className="font-mono text-xs text-[#333333] before:content-['→_'] before:text-[#ef4444]">
+            <li key={item} className="font-mono text-xs text-[#555555] before:content-['→_'] before:text-[#ef4444]">
               {item}
             </li>
           ))}
@@ -40,7 +40,7 @@ export default function About() {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-mono text-xs border border-[#1e1e1e] text-[#444444] hover:text-[#ef4444] hover:border-[#ef4444] transition-colors px-3 py-1.5"
+            className="font-mono text-xs border border-[#1e1e1e] text-[#777777] hover:text-[#ef4444] hover:border-[#ef4444] transition-colors px-3 py-1.5"
           >
             {label}
           </a>

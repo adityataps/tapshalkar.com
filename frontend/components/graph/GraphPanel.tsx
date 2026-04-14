@@ -50,7 +50,7 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
   }, [activeNodeIds]);
 
   const nodeEdgeCount = data.nodes.length > 0 && (
-    <div className="absolute bottom-4 right-4 z-10 font-mono text-[#333333] text-[9px] tracking-[0.12em] select-none">
+    <div className="absolute bottom-4 right-4 z-10 font-mono text-[#555555] text-[9px] tracking-[0.12em] select-none">
       {data.nodes.length} nodes · {data.edges.length} edges
     </div>
   );
@@ -59,14 +59,14 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
     <div className="absolute bottom-4 left-4 z-10 flex gap-2 items-center">
       <button
         onClick={handleReset}
-        className="text-[#444444] hover:text-[#f5f5f0] text-xs px-2 py-1 border border-[#444444] hover:border-[#f5f5f0] transition-colors"
+        className="text-[#777777] hover:text-[#f5f5f0] text-xs px-2 py-1 border border-[#444444] hover:border-[#f5f5f0] transition-colors"
         title="Reset view"
       >
         ↺
       </button>
       <button
         onClick={() => setExpanded((e) => !e)}
-        className="text-[#444444] hover:text-[#f5f5f0] text-xs px-2 py-1 border border-[#444444] hover:border-[#f5f5f0] transition-colors"
+        className="text-[#777777] hover:text-[#f5f5f0] text-xs px-2 py-1 border border-[#444444] hover:border-[#f5f5f0] transition-colors"
         title={expanded ? "Collapse" : "Expand"}
       >
         {expanded ? "⊠" : "⤢"}
@@ -102,7 +102,7 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
           {rightPanel && !chatOpen && (
             <button
               onClick={() => setChatOpen(true)}
-              className="absolute top-1/2 right-0 -translate-y-1/2 z-10 px-1.5 py-3 border border-r-0 border-[#1e1e1e] bg-[#0d0d0d] text-[#444444] hover:text-[#f5f5f0] hover:border-[#444444] transition-colors"
+              className="absolute top-1/2 right-0 -translate-y-1/2 z-10 px-1.5 py-3 border border-r-0 border-[#1e1e1e] bg-[#0d0d0d] text-[#777777] hover:text-[#f5f5f0] hover:border-[#444444] transition-colors"
               title="Open chat"
             >
               <span className="font-mono text-xs">‹</span>
@@ -114,14 +114,14 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
             <div className="flex justify-between px-4 pt-3 pb-2 border-b border-[#1e1e1e]">
               <button
                 onClick={() => setChatOpen(false)}
-                className="text-[#444444] hover:text-[#f5f5f0] text-xs transition-colors"
+                className="text-[#777777] hover:text-[#f5f5f0] text-xs transition-colors"
                 title="Collapse chat"
               >
                 ›
               </button>
               <button
                 onClick={() => setExpanded(false)}
-                className="text-[#444444] hover:text-[#f5f5f0] text-xs transition-colors"
+                className="text-[#777777] hover:text-[#f5f5f0] text-xs transition-colors"
                 title="Exit fullscreen"
               >
                 ✕

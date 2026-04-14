@@ -28,7 +28,7 @@ export default function CurrentlyBlock() {
 
   return (
     <div className="mt-6">
-      <p className="text-[#444444] text-xs uppercase tracking-widest mb-3">Currently</p>
+      <p className="text-[#777777] text-xs uppercase tracking-widest mb-3">Currently</p>
       <div className="flex flex-col gap-2 text-sm">
         {data.working_on?.map((p) => (
           <Row key={p.name} label="Working on" value={p.name} url={p.url} />
@@ -62,7 +62,7 @@ export default function CurrentlyBlock() {
 function Row({ label, value, url }: { label: string; value: string; url?: string }) {
   return (
     <div className="flex gap-3">
-      <span className="text-[#444444] w-28 shrink-0">{label}</span>
+      <span className="text-[#777777] w-28 shrink-0">{label}</span>
       {url ? (
         <a href={url} target="_blank" rel="noopener noreferrer" className="text-[#f5f5f0] hover:text-[#ef4444] transition-colors">
           {value}
