@@ -3,6 +3,8 @@
 import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import { GraphNode, GraphEdge, GraphData, NODE_COLORS } from "./types";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { forceX, forceY } = require("d3-force-3d");
 
 export type { GraphNode, GraphEdge, GraphData };
 export { NODE_COLORS };
@@ -32,6 +34,15 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  // Add gentle centering forces so isolated nodes don't drift away on drag
+  useEffect(() => {
+    if (dimensions.width === 0) return;
+    const fg = resolvedRef.current;
+    if (!fg) return;
+    fg.d3Force("x", forceX(0).strength(0.04));
+    fg.d3Force("y", forceY(0).strength(0.04));
+  }, [dimensions.width]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const graphData = useMemo(() => ({
     nodes: data.nodes.map((n) => ({ ...n })),
