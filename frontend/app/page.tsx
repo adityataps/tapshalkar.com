@@ -2,10 +2,48 @@
 
 import { useState } from "react";
 import GraphPanel from "@/components/graph/GraphPanel";
-import ChatPanel from "@/components/chat/ChatPanel";
+import ChatPanel, { type Message } from "@/components/chat/ChatPanel";
+import type { GraphNode } from "@/components/graph/types";
 
 export default function Home() {
   const [activeNodeIds, setActiveNodeIds] = useState<string[]>([]);
+  const [selectedNodes, setSelectedNodes] = useState<GraphNode[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+
+  const handleNodeSelect = (node: GraphNode) => {
+    setSelectedNodes((prev) =>
+      prev.some((n) => n.id === node.id)
+        ? prev.filter((n) => n.id !== node.id)
+        : [...prev, node]
+    );
+  };
+
+  const handleDeselectNode = (id: string) => {
+    setSelectedNodes((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const handleClearSelectedNodes = () => setSelectedNodes([]);
+
+  const handleActiveNodesChange = (ids: string[]) => {
+    setActiveNodeIds(ids);
+    setSelectedNodes([]); // agent response clears user selection
+  };
+
+  const handleNewChat = () => {
+    setMessages([]);
+    setActiveNodeIds([]);
+    setSelectedNodes([]);
+  };
+
+  const chatProps = {
+    onActiveNodesChange: handleActiveNodesChange,
+    selectedNodes,
+    onClearSelectedNodes: handleClearSelectedNodes,
+    onDeselectNode: handleDeselectNode,
+    messages,
+    onMessagesChange: setMessages,
+    onNewChat: handleNewChat,
+  };
 
   return (
     <div className="min-h-screen">
@@ -44,16 +82,31 @@ export default function Home() {
 
         {/* Right: graph */}
         <div className="h-[420px] lg:h-[500px]">
-          <GraphPanel activeNodeIds={activeNodeIds} />
+          <GraphPanel
+            activeNodeIds={activeNodeIds}
+            selectedNodeIds={selectedNodes.map((n) => n.id)}
+            onNodeSelect={handleNodeSelect}
+            rightPanel={<ChatPanel {...chatProps} />}
+          />
         </div>
       </section>
+
+      {/* Scroll indicator */}
+      <div className="flex justify-center pb-8 -mt-8">
+        <div className="flex flex-col items-center gap-1 animate-bounce">
+          <span className="font-mono text-[#444444] text-[10px] tracking-[0.2em] uppercase">ask me</span>
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-[#444444]">
+            <path d="M1 4l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+      </div>
 
       {/* Divider */}
       <div className="border-t border-[#1e1e1e]" />
 
       {/* Chat section */}
       <section className="mx-auto max-w-6xl px-6 py-16">
-        <ChatPanel onActiveNodesChange={setActiveNodeIds} />
+        <ChatPanel {...chatProps} />
       </section>
     </div>
   );

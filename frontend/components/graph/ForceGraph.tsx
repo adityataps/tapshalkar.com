@@ -2,50 +2,23 @@
 
 import ForceGraph2D, { ForceGraphMethods } from "react-force-graph-2d";
 import { useCallback, useRef, useState, useEffect, useMemo } from "react";
+import { GraphNode, GraphEdge, GraphData, NODE_COLORS } from "./types";
 
-export interface GraphNode {
-  id: string;
-  type: "skill" | "project" | "experience" | "education" | "interest" | "health";
-  label: string;
-  description?: string;
-  metadata?: Record<string, unknown>;
-  x?: number;
-  y?: number;
-}
-
-export interface GraphEdge {
-  source: string;
-  target: string;
-  type: string;
-  weight: number;
-}
-
-export interface GraphData {
-  nodes: GraphNode[];
-  edges: GraphEdge[];
-}
+export type { GraphNode, GraphEdge, GraphData };
+export { NODE_COLORS };
 
 interface Props {
   data: GraphData;
   activeNodeIds?: string[];
+  selectedNodeIds?: string[];
   onNodeClick?: (node: GraphNode) => void;
   graphRef?: React.MutableRefObject<ForceGraphMethods | undefined>;
 }
 
-const NODE_COLORS: Record<GraphNode["type"], string> = {
-  skill:      "#3b82f6",
-  project:    "#34d399",
-  experience: "#a78bfa",
-  education:  "#fbbf24",
-  interest:   "#f472b6",
-  health:     "#4ade80",
-};
-
-export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, graphRef }: Props) {
+export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds = [], onNodeClick, graphRef }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
-  // Internal ref used when no graphRef is passed in from the parent
   const internalRef = useRef<ForceGraphMethods | undefined>(undefined);
   const resolvedRef = graphRef ?? internalRef;
 
@@ -63,14 +36,18 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
   const graphData = useMemo(() => ({
     nodes: data.nodes.map((n) => ({ ...n })),
     links: data.edges.map((e) => ({ source: e.source, target: e.target, type: e.type, weight: e.weight })),
-  }), [data]);
+  }), [data.nodes, data.edges]);
 
   const activeSet = useMemo(() => new Set(activeNodeIds), [activeNodeIds]);
+  const selectedSet = useMemo(() => new Set(selectedNodeIds), [selectedNodeIds]);
 
   const nodeColor = useCallback(
-    (node: GraphNode) =>
-      activeSet.has(node.id) ? "#ef4444" : NODE_COLORS[node.type] ?? "#888",
-    [activeSet]
+    (node: GraphNode) => {
+      if (selectedSet.has(node.id)) return "#22d3ee";
+      if (activeSet.has(node.id)) return "#ef4444";
+      return NODE_COLORS[node.type] ?? "#888";
+    },
+    [selectedSet, activeSet]
   );
 
   const linkColor = useCallback(
@@ -81,6 +58,11 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
       return activeSet.has(src) && activeSet.has(tgt) ? "#ef4444" : "#1e1e1e";
     },
     [activeSet]
+  );
+
+  const linkWidth = useCallback(
+    (link: object) => ((link as GraphEdge).weight ?? 1) * 1.5,
+    []
   );
 
   const nodeLabel = useCallback((node: GraphNode) => {
@@ -105,7 +87,7 @@ export default function ForceGraph({ data, activeNodeIds = [], onNodeClick, grap
           nodeRelSize={5}
           warmupTicks={150}
           linkColor={linkColor}
-          linkWidth={(link: object) => ((link as GraphEdge).weight ?? 1) * 1.5}
+          linkWidth={linkWidth}
           onNodeClick={onNodeClick as ((node: object) => void) | undefined}
         />
       )}
