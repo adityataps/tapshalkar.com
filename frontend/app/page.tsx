@@ -7,6 +7,7 @@ import type { GraphNode } from "@/components/graph/types";
 
 export default function Home() {
   const [activeNodeIds, setActiveNodeIds] = useState<string[]>([]);
+  const [agentZoomTrigger, setAgentZoomTrigger] = useState(0);
   const [selectedNodes, setSelectedNodes] = useState<GraphNode[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -27,7 +28,8 @@ export default function Home() {
 
   const handleActiveNodesChange = (ids: string[]) => {
     setActiveNodeIds(ids);
-    setSelectedNodes([]); // agent response clears user selection
+    setSelectedNodes([]);
+    setAgentZoomTrigger((n) => n + 1);
   };
 
   const handleNewChat = () => {
@@ -88,6 +90,7 @@ export default function Home() {
         <div className="h-[420px] lg:h-[500px] flex flex-col gap-2">
           <GraphPanel
             activeNodeIds={activeNodeIds}
+            agentZoomTrigger={agentZoomTrigger}
             selectedNodeIds={selectedNodes.map((n) => n.id)}
             onNodeSelect={handleNodeSelect}
             onDeselectAll={handleClearSelectedNodes}

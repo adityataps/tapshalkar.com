@@ -11,13 +11,14 @@ const EMPTY_GRAPH: GraphData = { nodes: [], edges: [] };
 
 interface Props {
   activeNodeIds?: string[];
+  agentZoomTrigger?: number;
   selectedNodeIds?: string[];
   onNodeSelect?: (node: GraphNode) => void;
   onDeselectAll?: () => void;
   rightPanel?: React.ReactNode;
 }
 
-export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], onNodeSelect, onDeselectAll, rightPanel }: Props) {
+export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selectedNodeIds = [], onNodeSelect, onDeselectAll, rightPanel }: Props) {
   const [data, setData] = useState<GraphData>(EMPTY_GRAPH);
   const [expanded, setExpanded] = useState(false);
   const [chatOpen, setChatOpen] = useState(true);
@@ -42,12 +43,12 @@ export default function GraphPanel({ activeNodeIds = [], selectedNodeIds = [], o
   const handleReset = () => graphRef.current?.zoomToFit(400);
 
   useEffect(() => {
-    if (activeNodeIds.length === 0) return;
+    if (!agentZoomTrigger || activeNodeIds.length === 0) return;
     const t = setTimeout(() => {
       graphRef.current?.zoomToFit(600, 150, (node) => activeNodeIds.includes((node as GraphNode).id));
     }, 150);
     return () => clearTimeout(t);
-  }, [activeNodeIds]);
+  }, [agentZoomTrigger]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const nodeEdgeCount = data.nodes.length > 0 && (
     <div className="absolute bottom-4 right-4 z-10 font-mono text-[#555555] text-[9px] tracking-[0.12em] select-none">
