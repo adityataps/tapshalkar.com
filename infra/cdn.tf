@@ -37,6 +37,8 @@ resource "google_compute_backend_service" "backend" {
   backend {
     group = google_compute_region_network_endpoint_group.backend.id
   }
+
+  security_policy = google_compute_security_policy.backend.id
 }
 
 # URL map: /api/* → Cloud Run, everything else → GCS
