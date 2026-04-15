@@ -40,7 +40,6 @@ export default function Home() {
 
   const chatProps = {
     onActiveNodesChange: handleActiveNodesChange,
-    onActiveNodesPreview: setActiveNodeIds,
     selectedNodes,
     onClearSelectedNodes: handleClearSelectedNodes,
     onDeselectNode: handleDeselectNode,

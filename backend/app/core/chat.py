@@ -231,7 +231,6 @@ async def run_chat_stream(
                     nodes, node_ids, edges = await search_graph(tool_use.input.get("query", ""), graph, voyage_api_key)
                     active_node_ids.update(node_ids)
                     content = json.dumps({"nodes": nodes, "related_edges": edges})
-                    yield f'data: {json.dumps({"type": "nodes", "activeNodeIds": list(active_node_ids)})}\n\n'
                 elif tool_use.name == "cite_nodes":
                     cited_node_ids = tool_use.input.get("node_ids", [])
                     content = "ok"
