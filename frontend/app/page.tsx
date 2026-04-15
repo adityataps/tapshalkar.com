@@ -55,7 +55,7 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-6 pt-14 pb-8">
 
         {/* Split hero */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-12">
 
           {/* Left: text */}
           <div>
@@ -91,7 +91,7 @@ export default function Home() {
           </div>
 
           {/* Right: graph */}
-          <div className="h-[380px] lg:h-[400px] flex flex-col gap-2">
+          <div className="h-[420px] lg:h-[500px] flex flex-col gap-2">
             <GraphPanel
               activeNodeIds={activeNodeIds}
               agentZoomTrigger={agentZoomTrigger}
