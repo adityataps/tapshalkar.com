@@ -36,15 +36,16 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
     return () => observer.disconnect();
   }, []);
 
-  // Add gentle centering forces so isolated nodes don't drift away on drag
+  // Tune forces: stronger repulsion for clean initial layout, weak link pull to reduce drag chaos
   useEffect(() => {
     if (dimensions.width === 0) return;
     const fg = resolvedRef.current;
     if (!fg) return;
     fg.d3Force("x", forceX(0).strength(0.04));
     fg.d3Force("y", forceY(0).strength(0.04));
-    fg.d3Force("charge")?.strength(-60);
-    fg.d3Force("collide", forceCollide(14));
+    fg.d3Force("charge")?.strength(-180).distanceMax(120);
+    fg.d3Force("collide", forceCollide(16));
+    fg.d3Force("link")?.strength(0.15).distance(60);
   }, [dimensions.width]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const graphData = useMemo(() => ({
@@ -148,8 +149,8 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
           nodeCanvasObject={nodeCanvasObject}
           nodeCanvasObjectMode={() => "replace"}
           nodeRelSize={5}
-          warmupTicks={300}
-          d3VelocityDecay={0.6}
+          warmupTicks={500}
+          d3VelocityDecay={0.7}
           d3AlphaDecay={0.04}
           linkColor={linkColor}
           linkWidth={linkWidth}
