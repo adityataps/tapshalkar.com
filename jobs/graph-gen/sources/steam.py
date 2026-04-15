@@ -7,7 +7,8 @@ import httpx
 class SteamGame:
     name: str
     app_id: int
-    hours_played: int        # total hours (converted from minutes)
+    hours_played: int         # total lifetime hours
+    hours_last_2weeks: int    # hours played in the last 2 weeks (0 if not recently played)
     store_url: str
 
 
@@ -39,6 +40,7 @@ async def fetch_steam(api_key: str, user_id: str) -> SteamData:
             name=g["name"],
             app_id=g["appid"],
             hours_played=g.get("playtime_forever", 0) // 60,
+            hours_last_2weeks=g.get("playtime_2weeks", 0) // 60,
             store_url=f"https://store.steampowered.com/app/{g['appid']}",
         )
 

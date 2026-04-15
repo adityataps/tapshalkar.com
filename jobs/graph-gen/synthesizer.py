@@ -101,6 +101,9 @@ Enriched metadata — always populate when the data is present:
 - playlist nodes (subtype "playlist"): emit one node per entry in spotify.playlists; set
   metadata.track_count, metadata.top_genres (list), metadata.genre_distribution (object of top genres
   with counts), metadata.recently_added (list of {track, artist} for the last 5 additions)
+- game/interest nodes for Steam: set metadata.hours_total and metadata.hours_last_2weeks from
+  steam.most_played and steam.recently_played; a game appearing in recently_played is actively
+  being played right now — reflect that in the description
 
 Edge rules (apply all that are relevant — edges array must not be empty):
 - skill → project: used_in edges for each language/skill used in a project
@@ -186,8 +189,8 @@ async def synthesize_graph(
             ],
         },
         "steam": {
-            "most_played": [{"name": g.name, "hours": g.hours_played, "url": g.store_url} for g in steam.most_played[:5]],
-            "recently_played": [g.name for g in steam.recently_played],
+            "most_played": [{"name": g.name, "hours_total": g.hours_played, "hours_last_2weeks": g.hours_last_2weeks, "url": g.store_url} for g in steam.most_played[:5]],
+            "recently_played": [{"name": g.name, "hours_total": g.hours_played, "hours_last_2weeks": g.hours_last_2weeks, "url": g.store_url} for g in steam.recently_played],
         },
         "trakt": {
             "history": [{"title": i.title, "type": i.media_type, "year": i.year, "url": i.trakt_url, "genres": i.genres} for i in trakt.history[:20]],
