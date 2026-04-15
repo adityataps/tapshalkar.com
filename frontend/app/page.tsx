@@ -50,10 +50,10 @@ export default function Home() {
 
   return (
     <div>
-      <section className="mx-auto max-w-6xl px-6 pt-14 pb-8">
+      <section className="mx-auto max-w-6xl px-6 pt-6 lg:pt-14 pb-8">
 
         {/* Split hero */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center mb-8 lg:mb-12">
 
           {/* Left: text */}
           <div>
