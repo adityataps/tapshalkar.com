@@ -1,5 +1,8 @@
+import asyncio
 import json
+import math
 import anthropic
+import voyageai
 from typing import AsyncGenerator
 from app.core.model_armor import shield
 
@@ -69,19 +72,16 @@ def build_graph_schema(graph: dict) -> str:
     return ", ".join(f"{t} ({c})" for t, c in sorted(counts.items()))
 
 
-def search_graph(query: str, graph: dict) -> tuple[list[dict], list[str], list[dict]]:
-    """
-    Case-insensitive substring search over node labels, descriptions, and metadata.
+def _cosine_sim(a: list[float], b: list[float]) -> float:
+    dot = sum(x * y for x, y in zip(a, b))
+    mag = math.sqrt(sum(x * x for x in a)) * math.sqrt(sum(x * x for x in b))
+    return dot / mag if mag else 0.0
 
-    Returns (matched_nodes[:10], matched_node_ids, edges_between_matched_nodes).
-    """
+
+def _substring_search(query: str, nodes: list[dict]) -> list[dict]:
+    """Fallback for graphs without embeddings."""
     q = query.lower()
-    nodes = graph.get("nodes", [])
-    edges = graph.get("edges", [])
-
     matched = []
-    matched_ids: set[str] = set()
-
     for node in nodes:
         searchable = " ".join([
             node.get("label", ""),
@@ -89,21 +89,46 @@ def search_graph(query: str, graph: dict) -> tuple[list[dict], list[str], list[d
             node.get("description", ""),
             str(node.get("metadata", {})),
         ]).lower()
-        # Match if query is in node text OR any node token appears in the query
-        # (handles pluralised/combined queries like "podcasts and audiobooks")
-        node_tokens = [t for t in searchable.split() if len(t) > 3]
-        if q in searchable or any(t in q for t in node_tokens):
+        tokens = [t for t in searchable.split() if len(t) > 3]
+        if q in searchable or any(t in q for t in tokens):
             matched.append(node)
-            matched_ids.add(node["id"])
+    return matched[:10]
 
-    matched = matched[:10]
+
+async def search_graph(
+    query: str, graph: dict, voyage_api_key: str
+) -> tuple[list[dict], list[str], list[dict]]:
+    """
+    Semantic search over graph nodes using Voyage AI embeddings.
+    Falls back to substring search if embeddings are absent.
+
+    Returns (matched_nodes, matched_node_ids, edges_between_matched_nodes).
+    """
+    nodes = graph.get("nodes", [])
+    edges = graph.get("edges", [])
+
+    nodes_with_embeddings = [n for n in nodes if n.get("embedding")]
+
+    if nodes_with_embeddings and voyage_api_key:
+        client = voyageai.Client(api_key=voyage_api_key)
+        result = await asyncio.to_thread(
+            client.embed, [query], "voyage-3-lite", "query"
+        )
+        q_emb = result.embeddings[0]
+        scored = sorted(
+            ((n, _cosine_sim(q_emb, n["embedding"])) for n in nodes_with_embeddings),
+            key=lambda x: x[1],
+            reverse=True,
+        )
+        matched = [n for n, _ in scored[:10]]
+    else:
+        matched = _substring_search(query, nodes)
+
     matched_ids = {n["id"] for n in matched}
-
     relevant_edges = [
         e for e in edges
         if e.get("source") in matched_ids and e.get("target") in matched_ids
     ]
-
     return matched, list(matched_ids), relevant_edges
 
 
@@ -115,6 +140,7 @@ async def run_chat_stream(
     resume: str,
     model_armor_template: str,
     api_key: str,
+    voyage_api_key: str = "",
 ) -> AsyncGenerator[str, None]:
     """
     Async generator that yields SSE-formatted strings.
@@ -174,7 +200,7 @@ async def run_chat_stream(
 
             for tool_use in tool_use_blocks:
                 if tool_use.name == "search_knowledge_graph":
-                    nodes, node_ids, edges = search_graph(tool_use.input.get("query", ""), graph)
+                    nodes, node_ids, edges = await search_graph(tool_use.input.get("query", ""), graph, voyage_api_key)
                     active_node_ids.update(node_ids)
                     content = json.dumps({"nodes": nodes, "related_edges": edges})
                     yield f'data: {json.dumps({"type": "nodes", "activeNodeIds": list(active_node_ids)})}\n\n'

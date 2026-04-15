@@ -39,6 +39,7 @@ resource "google_cloud_run_v2_service" "backend" {
         for_each = {
           "ANTHROPIC_API_KEY" = "anthropic-api-key"
           "RESEND_API_KEY"    = "resend-api-key"
+          "VOYAGE_API_KEY"    = "voyage-api-key"
         }
         content {
           name = env.key

@@ -36,6 +36,7 @@ resource "google_cloud_run_v2_job" "graph_gen" {
         dynamic "env" {
           for_each = {
             "ANTHROPIC_API_KEY"     = "anthropic-api-key"
+            "VOYAGE_API_KEY"        = "voyage-api-key"
             "SPOTIFY_CLIENT_ID"     = "spotify-client-id"
             "SPOTIFY_CLIENT_SECRET" = "spotify-client-secret"
             "SPOTIFY_REFRESH_TOKEN" = "spotify-refresh-token"

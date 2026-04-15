@@ -8,6 +8,7 @@ class Node:
     label: str
     description: str = ""
     metadata: dict = field(default_factory=dict)
+    embedding: list[float] = field(default_factory=list)
 
 
 @dataclass

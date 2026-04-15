@@ -55,6 +55,7 @@ async def chat(request: Request, body: ChatRequest) -> StreamingResponse:
             resume=request.app.state.resume,
             model_armor_template=settings.model_armor_template,
             api_key=settings.anthropic_api_key,
+            voyage_api_key=settings.voyage_api_key,
         ):
             yield chunk
 

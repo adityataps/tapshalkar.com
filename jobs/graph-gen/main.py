@@ -11,6 +11,7 @@ from sources.steam import fetch_steam
 from sources.trakt import fetch_trakt, TraktData
 from sources.apple_health import fetch_apple_health
 from synthesizer import synthesize_graph
+from embedder import embed_nodes
 from writer import write_outputs, build_currently
 
 
@@ -45,6 +46,7 @@ def _build_now(github, spotify, steam):
 async def run():
     bucket = os.environ["GCS_BUCKET"]
     api_key = os.environ["ANTHROPIC_API_KEY"]
+    voyage_api_key = os.environ.get("VOYAGE_API_KEY", "")
     health_prefix = os.environ.get("APPLE_HEALTH_PREFIX", "data/ephemeral/apple-health/")
 
     bio = load_bio()
@@ -88,6 +90,11 @@ async def run():
         bio=bio, resume=resume,
     )
     print(f"Graph: {len(graph.nodes)} nodes, {len(graph.edges)} edges")
+
+    if voyage_api_key:
+        graph.nodes = await embed_nodes(graph.nodes, voyage_api_key)
+    else:
+        print("VOYAGE_API_KEY not set — skipping embeddings")
 
     feed = _build_activity_feed(github, spotify, steam)
     now = _build_now(github, spotify, steam)

@@ -6,6 +6,7 @@ dependencies = [
     "anthropic>=0.40",
     "httpx>=0.28",
     "google-cloud-storage>=2.18",
+    "voyageai>=0.2",
 ]
 
 [dependency-groups]
