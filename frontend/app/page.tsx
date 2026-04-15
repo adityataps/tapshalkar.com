@@ -96,11 +96,12 @@ export default function Home() {
               activeNodeIds={activeNodeIds}
               agentZoomTrigger={agentZoomTrigger}
               selectedNodeIds={selectedNodes.map((n) => n.id)}
+              isContextFull={selectedNodes.length >= MAX_CONTEXT_NODES}
               onNodeSelect={handleNodeSelect}
               onDeselectAll={handleClearSelectedNodes}
               rightPanel={<ChatPanel {...chatProps} />}
             />
-            <p className="font-mono text-[#555555] text-[9px] tracking-[0.15em] text-right">
+            <p className={`font-mono text-[9px] tracking-[0.15em] text-right transition-colors ${selectedNodes.length >= MAX_CONTEXT_NODES ? "text-[#ef4444]" : "text-[#555555]"}`}>
               {selectedNodes.length >= MAX_CONTEXT_NODES
                 ? `${MAX_CONTEXT_NODES}/${MAX_CONTEXT_NODES} nodes — context full`
                 : selectedNodes.length > 0
