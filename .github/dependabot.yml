@@ -4,18 +4,34 @@ updates:
     directory: "/frontend"
     schedule:
       interval: "weekly"
+    groups:
+      npm-all:
+        patterns:
+          - "*"
 
   - package-ecosystem: "pip"
     directory: "/backend"
     schedule:
       interval: "weekly"
+    groups:
+      pip-backend:
+        patterns:
+          - "*"
 
   - package-ecosystem: "pip"
     directory: "/jobs/graph-gen"
     schedule:
       interval: "weekly"
+    groups:
+      pip-graph-gen:
+        patterns:
+          - "*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      github-actions-all:
+        patterns:
+          - "*"
