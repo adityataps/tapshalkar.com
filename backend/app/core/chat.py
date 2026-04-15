@@ -230,7 +230,8 @@ async def run_chat_stream(
                 if tool_use.name == "search_knowledge_graph":
                     nodes, node_ids, edges = await search_graph(tool_use.input.get("query", ""), graph, voyage_api_key)
                     active_node_ids.update(node_ids)
-                    content = json.dumps({"nodes": nodes, "related_edges": edges})
+                    slim_nodes = [{k: v for k, v in n.items() if k != "embedding"} for n in nodes]
+                    content = json.dumps({"nodes": slim_nodes, "related_edges": edges})
                 elif tool_use.name == "cite_nodes":
                     cited_node_ids = tool_use.input.get("node_ids", [])
                     content = "ok"
