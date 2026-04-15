@@ -151,7 +151,7 @@ export default function ChatPanel({
         {messages.length > 0 && onNewChat && (
           <button
             onClick={onNewChat}
-            className="font-mono text-[#777777] hover:text-[#f5f5f0] text-[9px] tracking-[0.15em] uppercase transition-colors"
+            className="font-mono text-[#777777] hover:text-[#f5f5f0] text-xs tracking-[0.15em] uppercase transition-colors border border-[#444444] hover:border-[#f5f5f0] px-3 py-1"
           >
             new chat
           </button>

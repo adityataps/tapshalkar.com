@@ -20,6 +20,7 @@ interface Props {
 
 export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selectedNodeIds = [], onNodeSelect, onDeselectAll, rightPanel }: Props) {
   const [data, setData] = useState<GraphData>(EMPTY_GRAPH);
+  const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
   const [chatOpen, setChatOpen] = useState(true);
   const graphRef = useRef<ForceGraphMethods | undefined>(undefined);
@@ -28,8 +29,9 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
     fetch(`${apiUrl}/api/graph`)
       .then((r) => { if (!r.ok) return null; return r.json(); })
-      .then((d) => d && setData(d))
-      .catch(() => {});
+      .then((d) => { if (d) setData(d); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -84,6 +86,14 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
     </div>
   );
 
+  const loadingOverlay = loading && (
+    <div className="absolute inset-0 flex items-center justify-center z-10">
+      <span className="font-mono text-[#555555] text-[10px] tracking-[0.2em] uppercase animate-pulse">
+        loading graph...
+      </span>
+    </div>
+  );
+
   const graph = (
     <ForceGraph
       data={data}
@@ -100,6 +110,7 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
         <div className="flex-1 relative overflow-hidden">
           {controls}
           {nodeEdgeCount}
+          {loadingOverlay}
           {graph}
           {rightPanel && !chatOpen && (
             <button
@@ -142,6 +153,7 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
     <div className="relative w-full h-full bg-[#0d0d0d] rounded-lg overflow-hidden border border-[#1e1e1e]">
       {controls}
       {nodeEdgeCount}
+      {loadingOverlay}
       {graph}
     </div>
   );
