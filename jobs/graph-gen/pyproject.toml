@@ -13,7 +13,7 @@ dependencies = [
 dev = [
     "pytest>=8.3",
     "pytest-asyncio>=0.24",
-    "anyio>=4.7",
+    "anyio>=4.13.0",
     "respx>=0.21",
 ]
 
