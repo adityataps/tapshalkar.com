@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { ForceGraphMethods } from "react-force-graph-2d";
 import type { GraphData, GraphNode } from "./types";
+import { NODE_COLORS } from "./types";
 
 const ForceGraph = dynamic(() => import("./ForceGraph"), { ssr: false });
 
@@ -23,7 +24,21 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
   const [chatOpen, setChatOpen] = useState(true);
+  const [isTouch, setIsTouch] = useState(false);
+  const [peekNode, setPeekNode] = useState<GraphNode | null>(null);
   const graphRef = useRef<ForceGraphMethods | undefined>(undefined);
+
+  useEffect(() => {
+    setIsTouch(window.matchMedia("(pointer: coarse)").matches);
+  }, []);
+
+  const handleNodeClick = (node: GraphNode) => {
+    if (isTouch) {
+      setPeekNode(node);
+    } else {
+      onNodeSelect?.(node);
+    }
+  };
 
   useEffect(() => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
@@ -99,14 +114,84 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
       data={data}
       activeNodeIds={activeNodeIds}
       selectedNodeIds={selectedNodeIds}
-      onNodeClick={onNodeSelect}
+      onNodeClick={handleNodeClick}
       graphRef={graphRef}
     />
+  );
+
+  const isSelected = peekNode ? selectedNodeIds.includes(peekNode.id) : false;
+  const isActive = peekNode ? activeNodeIds.includes(peekNode.id) : false;
+
+  const nodeSheet = peekNode && (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40"
+        onClick={() => setPeekNode(null)}
+      />
+      {/* Sheet */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#111111] border-t border-[#1e1e1e] px-5 pt-4 pb-8 rounded-t-xl">
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <span
+              className="shrink-0 w-2 h-2 rounded-full"
+              style={{ backgroundColor: NODE_COLORS[peekNode.type] ?? "#888" }}
+            />
+            <span
+              className="font-mono text-[10px] tracking-[0.15em] uppercase"
+              style={{ color: NODE_COLORS[peekNode.type] ?? "#888" }}
+            >
+              {peekNode.metadata?.subtype as string ?? peekNode.type}
+            </span>
+            {isActive && (
+              <span className="font-mono text-[9px] tracking-[0.1em] text-[#ef4444] border border-[#ef4444] px-1.5 py-0.5">
+                agent ref
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => setPeekNode(null)}
+            className="shrink-0 text-[#555555] hover:text-[#f5f5f0] text-sm transition-colors"
+          >
+            ✕
+          </button>
+        </div>
+
+        <p className="text-[#f5f5f0] font-serif text-lg leading-snug mb-2">{peekNode.label}</p>
+
+        {peekNode.description && (
+          <p className="text-[#777777] text-xs leading-relaxed mb-4">{peekNode.description}</p>
+        )}
+
+        {peekNode.metadata?.url && (
+          <a
+            href={peekNode.metadata.url as string}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-[10px] text-[#777777] hover:text-[#ef4444] underline underline-offset-2 block mb-4 transition-colors"
+          >
+            {peekNode.metadata.url as string}
+          </a>
+        )}
+
+        <button
+          onClick={() => { onNodeSelect?.(peekNode); setPeekNode(null); }}
+          className={`w-full font-mono text-xs py-2.5 border transition-colors ${
+            isSelected
+              ? "border-[#22d3ee] text-[#22d3ee] hover:border-[#555555] hover:text-[#777777]"
+              : "border-[#ef4444] text-[#ef4444] hover:border-[#f5f5f0] hover:text-[#f5f5f0]"
+          }`}
+        >
+          {isSelected ? "remove from context" : "add to context"}
+        </button>
+      </div>
+    </>
   );
 
   if (expanded) {
     return (
       <div className="fixed inset-0 z-50 bg-[#0d0d0d] flex transition-all duration-300">
+        {nodeSheet}
         <div className="flex-1 relative overflow-hidden">
           {controls}
           {nodeEdgeCount}
@@ -155,6 +240,7 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
       {nodeEdgeCount}
       {loadingOverlay}
       {graph}
+      {nodeSheet}
     </div>
   );
 }
