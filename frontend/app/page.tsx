@@ -11,12 +11,14 @@ export default function Home() {
   const [selectedNodes, setSelectedNodes] = useState<GraphNode[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
 
+  const MAX_CONTEXT_NODES = 5;
+
   const handleNodeSelect = (node: GraphNode) => {
-    setSelectedNodes((prev) =>
-      prev.some((n) => n.id === node.id)
-        ? prev.filter((n) => n.id !== node.id)
-        : [...prev, node]
-    );
+    setSelectedNodes((prev) => {
+      if (prev.some((n) => n.id === node.id)) return prev.filter((n) => n.id !== node.id);
+      if (prev.length >= MAX_CONTEXT_NODES) return prev;
+      return [...prev, node];
+    });
     setActiveNodeIds((prev) => prev.filter((id) => id !== node.id));
   };
 
@@ -99,8 +101,10 @@ export default function Home() {
               rightPanel={<ChatPanel {...chatProps} />}
             />
             <p className="font-mono text-[#555555] text-[9px] tracking-[0.15em] text-right">
-              {selectedNodes.length > 0
-                ? `${selectedNodes.length} node${selectedNodes.length > 1 ? "s" : ""} selected — included as context`
+              {selectedNodes.length >= MAX_CONTEXT_NODES
+                ? `${MAX_CONTEXT_NODES}/${MAX_CONTEXT_NODES} nodes — context full`
+                : selectedNodes.length > 0
+                ? `${selectedNodes.length}/${MAX_CONTEXT_NODES} nodes selected — included as context`
                 : "click nodes to add context to your messages"}
             </p>
           </div>
