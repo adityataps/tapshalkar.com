@@ -210,7 +210,8 @@ async def synthesize_graph(
     client = anthropic.Anthropic(api_key=api_key)
     messages = [{"role": "user", "content": f"Here is my data:\n\n{json.dumps(context, indent=2)}"}]
 
-    for _ in range(MAX_ITERATIONS):
+    for iteration in range(MAX_ITERATIONS):
+        print(f"  Iteration {iteration + 1}/{MAX_ITERATIONS}...")
         message = await asyncio.to_thread(
             client.messages.create,
             model="claude-opus-4-6",
@@ -222,7 +223,11 @@ async def synthesize_graph(
 
         tool_uses = [b for b in message.content if b.type == "tool_use"]
         if not tool_uses:
+            print(f"  No tool call on iteration {iteration + 1} — stopping.")
             break
+
+        tool_names = [t.name for t in tool_uses]
+        print(f"  Tools called: {', '.join(tool_names)}")
 
         # Append assistant turn
         messages.append({"role": "assistant", "content": message.content})
@@ -237,7 +242,9 @@ async def synthesize_graph(
                 return GraphOutput(nodes=nodes, edges=edges)
 
             elif tool_use.name == "fetch_github_readme":
-                content = await _fetch_readme(tool_use.input["owner"], tool_use.input["repo"])
+                repo = tool_use.input["repo"]
+                content = await _fetch_readme(tool_use.input["owner"], repo)
+                print(f"  Fetched README: {repo} ({len(content)} chars)")
                 tool_results.append({
                     "type": "tool_result",
                     "tool_use_id": tool_use.id,

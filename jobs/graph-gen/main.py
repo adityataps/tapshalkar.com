@@ -1,5 +1,7 @@
 import asyncio
 import os
+import time
+from collections import Counter
 from datetime import datetime, timezone
 
 from models import ActivityFeed, ActivityItem, NowSnapshot
@@ -44,6 +46,7 @@ def _build_now(github, spotify, steam):
 
 
 async def run():
+    t_start = time.perf_counter()
     bucket = os.environ["GCS_BUCKET"]
     api_key = os.environ["ANTHROPIC_API_KEY"]
     voyage_api_key = os.environ.get("VOYAGE_API_KEY", "")
@@ -56,6 +59,7 @@ async def run():
         print("No bio.md found — skipping bio context")
 
     print("Fetching sources in parallel...")
+    t_fetch = time.perf_counter()
     github, spotify, steam, health, resume = await asyncio.gather(
         fetch_github(username=os.environ["GITHUB_USERNAME"], token=os.environ["GITHUB_TOKEN"]),
         fetch_spotify(
@@ -78,22 +82,47 @@ async def run():
                 refresh_token=os.environ["TRAKT_REFRESH_TOKEN"],
             )
         except Exception as e:
-            print(f"Trakt fetch failed (skipping): {e}")
+            print(f"  Trakt fetch failed (skipping): {e}")
 
-    print(f"Fetched: {len(github.repos)} repos, {len(spotify.top_artists)} artists, "
-          f"{len(steam.most_played)} games, {len(trakt.history)} trakt items, "
-          f"steps={health.avg_daily_steps}")
+    print(f"Sources fetched in {time.perf_counter() - t_fetch:.1f}s")
+    print(f"  GitHub   : {len(github.repos)} repos | "
+          f"top langs: {', '.join(github.top_languages[:5])}")
+    active_repos = [r for r in github.repos if r.commits_last_30d > 0]
+    if active_repos:
+        print(f"             {len(active_repos)} repos with commits in last 30d: "
+              f"{', '.join(f'{r.name}({r.commits_last_30d})' for r in active_repos[:5])}")
+    print(f"  Spotify  : {len(spotify.top_artists)} top artists | "
+          f"{len(spotify.recently_played)} recent tracks | "
+          f"{len(spotify.playlists)} playlist(s)")
+    print(f"  Steam    : {len(steam.most_played)} top games | "
+          f"{len(steam.recently_played)} played recently"
+          + (f" ({', '.join(g.name for g in steam.recently_played)})" if steam.recently_played else ""))
+    print(f"  Trakt    : {len(trakt.history)} watched | {len(trakt.watchlist)} watchlist"
+          + (f" | watching: {trakt.watching.title}" if trakt.watching else ""))
+    if health.avg_daily_steps:
+        print(f"  Health   : {health.avg_daily_steps} avg steps/day | "
+              f"{health.avg_sleep_hours:.1f}h avg sleep"
+              + (f" | last workout: {health.last_workout_type} {health.last_workout_duration_min}min" if health.last_workout_type else ""))
+    else:
+        print(f"  Health   : no data")
+    print(f"  Resume   : {'loaded' if resume else 'not found'}")
 
     print("Synthesising knowledge graph with Claude...")
+    t_synth = time.perf_counter()
     graph = await synthesize_graph(
         github=github, spotify=spotify, steam=steam,
         trakt=trakt, health=health, api_key=api_key,
         bio=bio, resume=resume,
     )
-    print(f"Graph: {len(graph.nodes)} nodes, {len(graph.edges)} edges")
+    by_type = Counter(n.type for n in graph.nodes)
+    print(f"Graph synthesised in {time.perf_counter() - t_synth:.1f}s: "
+          f"{len(graph.nodes)} nodes, {len(graph.edges)} edges")
+    print(f"  Node types: {', '.join(f'{t}={c}' for t, c in sorted(by_type.items()))}")
 
     if voyage_api_key:
+        t_embed = time.perf_counter()
         graph.nodes = await embed_nodes(graph.nodes, voyage_api_key)
+        print(f"Embeddings done in {time.perf_counter() - t_embed:.1f}s")
     else:
         print("VOYAGE_API_KEY not set — skipping embeddings")
 
@@ -102,8 +131,11 @@ async def run():
     currently = build_currently(github, spotify, steam, trakt)
 
     print("Writing outputs to GCS...")
+    t_write = time.perf_counter()
     await write_outputs(bucket=bucket, graph=graph, feed=feed, now=now, currently=currently, bio=bio)
-    print("Done.")
+    print(f"Outputs written in {time.perf_counter() - t_write:.1f}s")
+
+    print(f"Done in {time.perf_counter() - t_start:.1f}s total.")
 
 
 if __name__ == "__main__":
