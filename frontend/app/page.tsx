@@ -49,80 +49,75 @@ export default function Home() {
     onNewChat: handleNewChat,
   };
 
+  const chatExpanded = messages.length > 0;
+
   return (
     <div className="min-h-screen">
-      {/* Split hero */}
-      <section className="mx-auto max-w-6xl px-6 py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[calc(100vh-3rem)]">
+      <section className="mx-auto max-w-6xl px-6 pt-14 pb-8">
 
-        {/* Left: text */}
-        <div>
-          <p className="font-mono text-[#ef4444] text-xs tracking-[0.2em] uppercase mb-4">
-            ~/Aditya-Tapshalkar
-          </p>
-          <h1 className="font-serif text-5xl font-bold text-[#f5f5f0] leading-tight mb-4">
-            I build systems<br />
-            that <em className="text-[#ef4444] not-italic">think</em>.
-          </h1>
-          <p className="text-[#777777] text-sm leading-relaxed max-w-sm mb-8">
-            Exploring language models, knowledge systems, and real-world product.
-            Currently based in Atlanta, GA.
-          </p>
-          <div className="flex gap-3">
-            {[
-              { label: "github", href: "https://github.com/adityataps" },
-              { label: "linkedin", href: "https://linkedin.com/in/adityatapshalkar" },
-              { label: "resume", href: "/Resume_Aditya_Tapshalkar.pdf" },
-              { label: "writing", href: "/blog" },
-            ].map(({ label, href }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono text-xs border border-[#1e1e1e] text-[#777777] hover:text-[#ef4444] hover:border-[#ef4444] transition-colors px-3 py-1.5"
-              >
-                {label}
-              </a>
-            ))}
+        {/* Split hero */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-6">
+
+          {/* Left: text */}
+          <div>
+            <p className="font-mono text-[#ef4444] text-xs tracking-[0.2em] uppercase mb-4">
+              ~/Aditya-Tapshalkar
+            </p>
+            <h1 className="font-serif text-5xl font-bold text-[#f5f5f0] leading-tight mb-4">
+              I build systems<br />
+              that <em className="text-[#ef4444] not-italic">think</em>.
+            </h1>
+            <p className="text-[#777777] text-sm leading-relaxed max-w-sm mb-8">
+              Exploring language models, knowledge systems, and real-world product.
+              Currently based in Atlanta, GA.
+            </p>
+            <div className="flex gap-3">
+              {[
+                { label: "github", href: "https://github.com/adityataps" },
+                { label: "linkedin", href: "https://linkedin.com/in/adityatapshalkar" },
+                { label: "resume", href: "/Resume_Aditya_Tapshalkar.pdf" },
+                { label: "writing", href: "/blog" },
+              ].map(({ label, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-mono text-xs border border-[#1e1e1e] text-[#777777] hover:text-[#ef4444] hover:border-[#ef4444] transition-colors px-3 py-1.5"
+                >
+                  {label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Right: graph */}
+          <div className="h-[380px] lg:h-[400px] flex flex-col gap-2">
+            <GraphPanel
+              activeNodeIds={activeNodeIds}
+              agentZoomTrigger={agentZoomTrigger}
+              selectedNodeIds={selectedNodes.map((n) => n.id)}
+              onNodeSelect={handleNodeSelect}
+              onDeselectAll={handleClearSelectedNodes}
+              rightPanel={<ChatPanel {...chatProps} />}
+            />
+            <p className="font-mono text-[#555555] text-[9px] tracking-[0.15em] text-right">
+              {selectedNodes.length > 0
+                ? `${selectedNodes.length} node${selectedNodes.length > 1 ? "s" : ""} selected — included as context`
+                : "click nodes to add context to your messages"}
+            </p>
           </div>
         </div>
 
-        {/* Right: graph */}
-        <div className="h-[420px] lg:h-[500px] flex flex-col gap-2">
-          <GraphPanel
-            activeNodeIds={activeNodeIds}
-            agentZoomTrigger={agentZoomTrigger}
-            selectedNodeIds={selectedNodes.map((n) => n.id)}
-            onNodeSelect={handleNodeSelect}
-            onDeselectAll={handleClearSelectedNodes}
-            rightPanel={<ChatPanel {...chatProps} />}
-          />
-          <p className="font-mono text-[#555555] text-[9px] tracking-[0.15em] text-right">
-            {selectedNodes.length > 0
-              ? `${selectedNodes.length} node${selectedNodes.length > 1 ? "s" : ""} selected — included as context`
-              : "click nodes to add context to your messages"}
-          </p>
-        </div>
-      </section>
-
-      {/* Scroll indicator */}
-      <div className="flex justify-center pb-8 -mt-8">
-        <div className="flex flex-col items-center gap-1 animate-bounce">
-          <span className="font-mono text-[#777777] text-[10px] tracking-[0.2em] uppercase">ask me</span>
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-[#777777]">
-            <path d="M1 4l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-      </div>
-
-      {/* Divider */}
-      <div className="border-t border-[#1e1e1e]" />
-
-      {/* Chat section */}
-      <section className="mx-auto max-w-6xl px-6 py-16">
-        <div className="h-[560px]">
+        {/* Chat — compact until first message, then expands downward */}
+        <div
+          className={`overflow-hidden transition-[height] duration-500 ease-in-out ${
+            chatExpanded ? "h-[520px]" : "h-[210px]"
+          }`}
+        >
           <ChatPanel {...chatProps} />
         </div>
+
       </section>
     </div>
   );
