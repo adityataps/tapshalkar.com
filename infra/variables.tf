@@ -47,3 +47,9 @@ variable "subdomain" {
   type        = string
   default     = "aditya"
 }
+
+variable "spotify_playlist_ids" {
+  description = "Comma-separated Spotify playlist IDs for the graph-gen job"
+  type        = string
+  default     = ""
+}

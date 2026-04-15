@@ -35,7 +35,7 @@ resource "google_cloud_run_v2_job" "graph_gen" {
 
         env {
           name  = "SPOTIFY_PLAYLIST_IDS"
-          value = "3M2rKB5fjAZ9SE3aGM95pd,7zWgmxTZPeOGwZs5qjoAjT,1ZWDkF5wjyV7YBev7ImxxS"
+          value = var.spotify_playlist_ids
         }
 
         dynamic "env" {
