@@ -15,9 +15,11 @@ SEARCH_GRAPH_TOOL = {
     "name": "search_knowledge_graph",
     "description": (
         "Search Aditya's knowledge graph for nodes matching a query. "
-        "Returns matching nodes and their direct connections. "
+        "Returns seed_nodes (direct semantic matches) and neighbor_nodes (1-hop connected nodes), "
+        "plus the edges between them. Use neighbor_nodes to discover related skills, projects, "
+        "writing, or interests connected to the seed matches. "
         "Call this before answering questions about skills, projects, interests, background, "
-        "or any media — including books, audiobooks, podcasts, shows, or music."
+        "writing, or any media — including books, audiobooks, podcasts, shows, or music."
     ),
     "input_schema": {
         "type": "object",
@@ -111,20 +113,57 @@ def _substring_search(query: str, nodes: list[dict]) -> list[dict]:
         tokens = [t for t in searchable.split() if len(t) > 3]
         if q in searchable or any(t in q for t in tokens):
             matched.append(node)
-    return matched[:10]
+    return matched[:5]
+
+
+def _build_adjacency(edges: list[dict]) -> dict[str, list[tuple[str, float]]]:
+    """Bidirectional adjacency map: {node_id: [(neighbor_id, weight), ...]}"""
+    adj: dict[str, list[tuple[str, float]]] = {}
+    for e in edges:
+        src, tgt = e.get("source"), e.get("target")
+        weight = float(e.get("weight", 1.0))
+        if src and tgt:
+            adj.setdefault(src, []).append((tgt, weight))
+            adj.setdefault(tgt, []).append((src, weight))
+    return adj
+
+
+def _expand_from_seeds(
+    seed_ids: set[str],
+    adj: dict[str, list[tuple[str, float]]],
+    nodes_by_id: dict[str, dict],
+    max_expanded: int = 15,
+) -> list[dict]:
+    """
+    1-hop BFS from seed nodes. Returns neighboring nodes sorted by
+    descending edge weight, capped at max_expanded. Excludes seeds.
+    """
+    candidates: dict[str, float] = {}  # neighbor_id → best weight from any seed
+    for seed_id in seed_ids:
+        for neighbor_id, weight in adj.get(seed_id, []):
+            if neighbor_id not in seed_ids and neighbor_id in nodes_by_id:
+                if weight > candidates.get(neighbor_id, -1):
+                    candidates[neighbor_id] = weight
+    sorted_neighbors = sorted(candidates.items(), key=lambda x: x[1], reverse=True)
+    return [nodes_by_id[nid] for nid, _ in sorted_neighbors[:max_expanded]]
 
 
 async def search_graph(
     query: str, graph: dict, voyage_api_key: str
-) -> tuple[list[dict], list[str], list[dict]]:
+) -> tuple[list[dict], list[dict], list[str], list[dict]]:
     """
-    Semantic search over graph nodes using Voyage AI embeddings.
-    Falls back to substring search if embeddings are absent.
+    Graph-RAG search: semantic retrieval of seed nodes + 1-hop edge traversal.
 
-    Returns (matched_nodes, matched_node_ids, edges_between_matched_nodes).
+    Returns (seed_nodes, neighbor_nodes, all_node_ids, relevant_edges).
+    - seed_nodes: direct semantic matches to the query
+    - neighbor_nodes: nodes reachable in 1 hop from seeds, sorted by edge weight
+    - all_node_ids: ids of seeds + neighbors (for graph highlighting)
+    - relevant_edges: all edges where both endpoints are in the returned set
     """
     nodes = graph.get("nodes", [])
     edges = graph.get("edges", [])
+    nodes_by_id = {n["id"]: n for n in nodes}
+    adj = _build_adjacency(edges)
 
     nodes_with_embeddings = [n for n in nodes if n.get("embedding")]
 
@@ -141,19 +180,19 @@ async def search_graph(
             key=lambda x: x[1],
             reverse=True,
         )
-        # Keep nodes above threshold; always return at least the top 3
-        # so narrow queries still get context
         above = [(n, s) for n, s in scored if s >= SIMILARITY_THRESHOLD]
-        matched = [n for n, _ in (above or scored[:3])[:10]]
+        seeds = [n for n, _ in (above or scored[:3])[:5]]
     else:
-        matched = _substring_search(query, nodes)
+        seeds = _substring_search(query, nodes)
 
-    matched_ids = {n["id"] for n in matched}
+    seed_ids = {n["id"] for n in seeds}
+    neighbors = _expand_from_seeds(seed_ids, adj, nodes_by_id)
+    all_ids = seed_ids | {n["id"] for n in neighbors}
     relevant_edges = [
         e for e in edges
-        if e.get("source") in matched_ids and e.get("target") in matched_ids
+        if e.get("source") in all_ids and e.get("target") in all_ids
     ]
-    return matched, list(matched_ids), relevant_edges
+    return seeds, neighbors, list(all_ids), relevant_edges
 
 
 async def run_chat_stream(
@@ -228,10 +267,15 @@ async def run_chat_stream(
             has_citation = False
             for tool_use in tool_use_blocks:
                 if tool_use.name == "search_knowledge_graph":
-                    nodes, node_ids, edges = await search_graph(tool_use.input.get("query", ""), graph, voyage_api_key)
+                    seeds, neighbors, node_ids, edges = await search_graph(tool_use.input.get("query", ""), graph, voyage_api_key)
                     active_node_ids.update(node_ids)
-                    slim_nodes = [{k: v for k, v in n.items() if k != "embedding"} for n in nodes]
-                    content = json.dumps({"nodes": slim_nodes, "related_edges": edges})
+                    def _slim(n: dict) -> dict:
+                        return {k: v for k, v in n.items() if k != "embedding"}
+                    content = json.dumps({
+                        "seed_nodes": [_slim(n) for n in seeds],
+                        "neighbor_nodes": [_slim(n) for n in neighbors],
+                        "edges": edges,
+                    })
                 elif tool_use.name == "cite_nodes":
                     cited_node_ids = tool_use.input.get("node_ids", [])
                     content = "ok"
