@@ -14,12 +14,13 @@ interface Props {
   activeNodeIds?: string[];
   agentZoomTrigger?: number;
   selectedNodeIds?: string[];
+  isContextFull?: boolean;
   onNodeSelect?: (node: GraphNode) => void;
   onDeselectAll?: () => void;
   rightPanel?: React.ReactNode;
 }
 
-export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selectedNodeIds = [], onNodeSelect, onDeselectAll, rightPanel }: Props) {
+export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selectedNodeIds = [], isContextFull = false, onNodeSelect, onDeselectAll, rightPanel }: Props) {
   const [data, setData] = useState<GraphData>(EMPTY_GRAPH);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
@@ -179,13 +180,16 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
 
         <button
           onClick={() => { onNodeSelect?.(peekNode); setPeekNode(null); }}
+          disabled={!isSelected && isContextFull}
           className={`w-full font-mono text-xs py-2.5 border transition-colors ${
             isSelected
               ? "border-[#22d3ee] text-[#22d3ee] hover:border-[#555555] hover:text-[#777777]"
+              : isContextFull
+              ? "border-[#333333] text-[#444444] cursor-not-allowed"
               : "border-[#ef4444] text-[#ef4444] hover:border-[#f5f5f0] hover:text-[#f5f5f0]"
           }`}
         >
-          {isSelected ? "remove from context" : "add to context"}
+          {isSelected ? "remove from context" : isContextFull ? "context full (5/5)" : "add to context"}
         </button>
       </div>
     </>

@@ -172,19 +172,23 @@ async def search_graph(
 
     if nodes_with_embeddings and voyage_api_key:
         import voyageai  # deferred — keeps cold-start memory low
-        client = voyageai.Client(api_key=voyage_api_key)
-        result = await asyncio.to_thread(
-            client.embed, [query], "voyage-3-lite", "query"
-        )
-        q_emb = result.embeddings[0]
-        SIMILARITY_THRESHOLD = 0.70
-        scored = sorted(
-            ((n, _cosine_sim(q_emb, n["embedding"])) for n in nodes_with_embeddings),
-            key=lambda x: x[1],
-            reverse=True,
-        )
-        above = [(n, s) for n, s in scored if s >= SIMILARITY_THRESHOLD]
-        seeds = [n for n, _ in (above or scored[:3])[:5]]
+        try:
+            client = voyageai.Client(api_key=voyage_api_key)
+            result = await asyncio.to_thread(
+                client.embed, [query], "voyage-3-lite", "query"
+            )
+            q_emb = result.embeddings[0]
+            SIMILARITY_THRESHOLD = 0.70
+            scored = sorted(
+                ((n, _cosine_sim(q_emb, n["embedding"])) for n in nodes_with_embeddings),
+                key=lambda x: x[1],
+                reverse=True,
+            )
+            above = [(n, s) for n, s in scored if s >= SIMILARITY_THRESHOLD]
+            seeds = [n for n, _ in (above or scored[:3])[:5]]
+        except voyageai.error.RateLimitError:
+            logger.warning("Voyage AI rate limit hit — falling back to substring search")
+            seeds = _substring_search(query, nodes)
     else:
         seeds = _substring_search(query, nodes)
 
