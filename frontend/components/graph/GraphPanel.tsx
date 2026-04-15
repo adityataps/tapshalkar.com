@@ -121,6 +121,8 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
 
   const isSelected = peekNode ? selectedNodeIds.includes(peekNode.id) : false;
   const isActive = peekNode ? activeNodeIds.includes(peekNode.id) : false;
+  const peekSubtype = typeof peekNode?.metadata?.subtype === "string" ? peekNode.metadata.subtype : undefined;
+  const peekUrl = typeof peekNode?.metadata?.url === "string" ? peekNode.metadata.url : undefined;
 
   const nodeSheet = peekNode && (
     <>
@@ -141,7 +143,7 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
               className="font-mono text-[10px] tracking-[0.15em] uppercase"
               style={{ color: NODE_COLORS[peekNode.type] ?? "#888" }}
             >
-              {peekNode.metadata?.subtype as string ?? peekNode.type}
+              {peekSubtype ?? peekNode.type}
             </span>
             {isActive && (
               <span className="font-mono text-[9px] tracking-[0.1em] text-[#ef4444] border border-[#ef4444] px-1.5 py-0.5">
@@ -163,14 +165,14 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
           <p className="text-[#777777] text-xs leading-relaxed mb-4">{peekNode.description}</p>
         )}
 
-        {peekNode.metadata?.url && (
+        {peekUrl && (
           <a
-            href={peekNode.metadata.url as string}
+            href={peekUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="font-mono text-[10px] text-[#777777] hover:text-[#ef4444] underline underline-offset-2 block mb-4 transition-colors"
           >
-            {peekNode.metadata.url as string}
+            {peekUrl}
           </a>
         )}
 
