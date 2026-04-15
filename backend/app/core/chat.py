@@ -1,9 +1,12 @@
 import asyncio
 import json
+import logging
 import math
 import anthropic
 from typing import AsyncGenerator
 from app.core.model_armor import shield
+
+logger = logging.getLogger(__name__)
 
 
 def _error_event(message: str) -> str:
@@ -298,18 +301,23 @@ async def run_chat_stream(
                 break
 
     except anthropic.RateLimitError:
+        logger.warning("Anthropic rate limit hit")
         yield _error_event("I'm being rate limited right now. Please try again in a moment.")
         return
     except anthropic.APIStatusError as e:
         if e.status_code == 529:
+            logger.warning("Anthropic API overloaded (529)")
             yield _error_event("The AI is overloaded right now. Please try again in a moment.")
         else:
+            logger.error("Anthropic API error: status=%s body=%s", e.status_code, e.message)
             yield _error_event("Something went wrong on my end. Please try again.")
         return
-    except anthropic.APIConnectionError:
+    except anthropic.APIConnectionError as e:
+        logger.error("Anthropic connection error: %s", e)
         yield _error_event("Couldn't reach the AI service. Check your connection and try again.")
         return
     except Exception:
+        logger.exception("Unhandled exception in run_chat_stream")
         yield _error_event("Something went wrong. Please try again.")
         return
 
