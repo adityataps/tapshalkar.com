@@ -13,11 +13,12 @@ interface Props {
   data: GraphData;
   activeNodeIds?: string[];
   selectedNodeIds?: string[];
+  peekNodeId?: string;
   onNodeClick?: (node: GraphNode) => void;
   graphRef?: React.MutableRefObject<ForceGraphMethods | undefined>;
 }
 
-export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds = [], onNodeClick, graphRef }: Props) {
+export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds = [], peekNodeId, onNodeClick, graphRef }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -53,6 +54,7 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
 
   const activeSet = useMemo(() => new Set(activeNodeIds), [activeNodeIds]);
   const selectedSet = useMemo(() => new Set(selectedNodeIds), [selectedNodeIds]);
+  const isPeek = useCallback((id: string) => id === peekNodeId, [peekNodeId]);
 
   const nodeColor = useCallback(
     (node: GraphNode) => NODE_COLORS[node.type] ?? "#888",
@@ -75,6 +77,17 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
       ctx.fillStyle = NODE_COLORS[n.type] ?? "#888";
       ctx.fill();
 
+      // Dashed ring for peek node (mobile: bottom sheet open, not yet added to context)
+      if (isPeek(n.id) && !selectedSet.has(n.id)) {
+        ctx.beginPath();
+        ctx.arc(x, y, r + 2.5, 0, 2 * Math.PI);
+        ctx.setLineDash([2, 2]);
+        ctx.strokeStyle = "#f5f5f0";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
       // Cyan ring for user-selected nodes
       if (selectedSet.has(n.id)) {
         ctx.beginPath();
@@ -95,7 +108,7 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
 
       ctx.globalAlpha = 1;
     },
-    [selectedSet, activeSet]
+    [selectedSet, activeSet, isPeek]
   );
 
   const linkColor = useCallback(

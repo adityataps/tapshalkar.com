@@ -114,6 +114,7 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
       data={data}
       activeNodeIds={activeNodeIds}
       selectedNodeIds={selectedNodeIds}
+      peekNodeId={peekNode?.id}
       onNodeClick={handleNodeClick}
       graphRef={graphRef}
     />
