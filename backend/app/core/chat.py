@@ -89,7 +89,10 @@ def search_graph(query: str, graph: dict) -> tuple[list[dict], list[str], list[d
             node.get("description", ""),
             str(node.get("metadata", {})),
         ]).lower()
-        if q in searchable:
+        # Match if query is in node text OR any node token appears in the query
+        # (handles pluralised/combined queries like "podcasts and audiobooks")
+        node_tokens = [t for t in searchable.split() if len(t) > 3]
+        if q in searchable or any(t in q for t in node_tokens):
             matched.append(node)
             matched_ids.add(node["id"])
 
