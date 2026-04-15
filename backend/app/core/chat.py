@@ -2,7 +2,6 @@ import asyncio
 import json
 import math
 import anthropic
-import voyageai
 from typing import AsyncGenerator
 from app.core.model_armor import shield
 
@@ -110,6 +109,7 @@ async def search_graph(
     nodes_with_embeddings = [n for n in nodes if n.get("embedding")]
 
     if nodes_with_embeddings and voyage_api_key:
+        import voyageai  # deferred — keeps cold-start memory low
         client = voyageai.Client(api_key=voyage_api_key)
         result = await asyncio.to_thread(
             client.embed, [query], "voyage-3-lite", "query"
