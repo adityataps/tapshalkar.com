@@ -115,12 +115,16 @@ async def search_graph(
             client.embed, [query], "voyage-3-lite", "query"
         )
         q_emb = result.embeddings[0]
+        SIMILARITY_THRESHOLD = 0.70
         scored = sorted(
             ((n, _cosine_sim(q_emb, n["embedding"])) for n in nodes_with_embeddings),
             key=lambda x: x[1],
             reverse=True,
         )
-        matched = [n for n, _ in scored[:10]]
+        # Keep nodes above threshold; always return at least the top 3
+        # so narrow queries still get context
+        above = [(n, s) for n, s in scored if s >= SIMILARITY_THRESHOLD]
+        matched = [n for n, _ in (above or scored[:3])[:10]]
     else:
         matched = _substring_search(query, nodes)
 
@@ -166,6 +170,9 @@ async def run_chat_stream(
     active_node_ids: set[str] = set()
     loop_messages = list(messages)
     emitted_text = False
+    accumulated_text = ""
+    # id → label map for grounding the final highlighted set
+    node_label_map = {n["id"]: n.get("label", "") for n in graph.get("nodes", [])}
 
     try:
         for _ in range(MAX_TOOL_ITERATIONS):
@@ -182,6 +189,7 @@ async def run_chat_stream(
             ) as stream:
                 async for text in stream.text_stream:
                     emitted_text = True
+                    accumulated_text += text
                     yield f'data: {json.dumps({"type": "text", "delta": text})}\n\n'
                 message = await stream.get_final_message()
 
@@ -235,4 +243,10 @@ async def run_chat_stream(
         yield _error_event("Something went wrong. Please try again.")
         return
 
-    yield f'data: {json.dumps({"type": "done", "activeNodeIds": list(active_node_ids)})}\n\n'
+    # Ground highlights: only surface nodes whose label appears in the response
+    response_lower = accumulated_text.lower()
+    grounded_ids = [
+        nid for nid in active_node_ids
+        if node_label_map.get(nid, "").lower() in response_lower
+    ]
+    yield f'data: {json.dumps({"type": "done", "activeNodeIds": grounded_ids})}\n\n'
