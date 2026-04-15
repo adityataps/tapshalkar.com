@@ -139,7 +139,7 @@ export default function ChatPanel({
   const showSuggestions = messages.length === 0 && !isStreaming;
 
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <p className="font-mono text-[#ef4444] text-xs tracking-[0.2em] uppercase">
           ask me anything
@@ -159,7 +159,7 @@ export default function ChatPanel({
       {(messages.length > 0 || isStreaming) && (
         <div
           ref={threadRef}
-          className="flex flex-col gap-4 flex-1 overflow-y-auto pr-2 min-h-0"
+          className="flex flex-col gap-4 overflow-y-auto pr-2 max-h-[460px]"
         >
           {messages.map((m, i) => (
             <ChatMessage key={i} role={m.role} content={m.content} contextNodes={m.contextNodes} />

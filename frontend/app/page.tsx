@@ -48,8 +48,6 @@ export default function Home() {
     onNewChat: handleNewChat,
   };
 
-  const chatExpanded = messages.length > 0;
-
   return (
     <div className="min-h-screen">
       <section className="mx-auto max-w-6xl px-6 pt-14 pb-8">
@@ -108,14 +106,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Chat — compact until first message, then expands downward */}
-        <div
-          className={`overflow-hidden transition-[height] duration-500 ease-in-out ${
-            chatExpanded ? "h-[520px]" : "h-[210px]"
-          }`}
-        >
-          <ChatPanel {...chatProps} />
-        </div>
+        <ChatPanel {...chatProps} />
 
       </section>
     </div>
