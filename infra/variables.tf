@@ -42,6 +42,12 @@ variable "steam_user_id" {
   type        = string
 }
 
+variable "spotify_playlist_ids" {
+  description = "Comma-separated Spotify playlist IDs to enrich (genre distribution + recent additions)"
+  type        = string
+  default     = ""
+}
+
 variable "subdomain" {
   description = "Primary subdomain for the portfolio (e.g. aditya)"
   type        = string

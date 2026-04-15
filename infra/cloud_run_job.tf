@@ -33,6 +33,11 @@ resource "google_cloud_run_v2_job" "graph_gen" {
           value = var.steam_user_id
         }
 
+        env {
+          name  = "SPOTIFY_PLAYLIST_IDS"
+          value = var.spotify_playlist_ids
+        }
+
         dynamic "env" {
           for_each = {
             "ANTHROPIC_API_KEY"     = "anthropic-api-key"

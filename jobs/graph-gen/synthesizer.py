@@ -40,7 +40,7 @@ GRAPH_TOOL = {
                         "description": {"type": "string"},
                         "metadata": {
                             "type": "object",
-                            "description": "For interest nodes set subtype to one of: artist, album, track, podcast, audiobook, movie, show, genre",
+                            "description": "For interest nodes set subtype to one of: artist, album, track, podcast, audiobook, movie, show, genre, playlist",
                         },
                     },
                     "required": ["id", "type", "label"],
@@ -93,6 +93,15 @@ Node rules:
 - Always set metadata.subtype on every interest node
 - Prefer accuracy over speculation; use bio content to enrich descriptions
 
+Enriched metadata — always populate when the data is present:
+- project nodes: set metadata.commits_last_30d (integer) and metadata.last_pushed_at (date string)
+  from github.repos[].commits_last_30d and github.repos[].last_pushed_at
+- artist nodes: set metadata.recent_play_count (integer) from spotify.artist_play_counts[artist_name]
+  and metadata.last_played_at (ISO string) from spotify.artist_last_played[artist_name]
+- playlist nodes (subtype "playlist"): emit one node per entry in spotify.playlists; set
+  metadata.track_count, metadata.top_genres (list), metadata.genre_distribution (object of top genres
+  with counts), metadata.recently_added (list of {track, artist} for the last 5 additions)
+
 Edge rules (apply all that are relevant — edges array must not be empty):
 - skill → project: used_in edges for each language/skill used in a project
 - album → artist: relates_to edge (every album node must connect to its artist node)
@@ -100,6 +109,8 @@ Edge rules (apply all that are relevant — edges array must not be empty):
 - artist/album/genre → project: relates_to edge when music taste is relevant to a project
 - podcast/audiobook → skill: relates_to edge when the topic overlaps a skill
 - interest → interest: relates_to edges between related interests
+- playlist → artist: relates_to edge when the artist appears in the playlist
+- playlist → genre: relates_to edge for top genres in a playlist
 - bio-sourced nodes → relevant skill/project/experience nodes: relates_to edges
 - Edge weight 0.0–1.0 based on relationship strength
 """
@@ -139,6 +150,8 @@ async def synthesize_graph(
                     "topics": r.topics,
                     "stars": r.stars,
                     "url": r.url,
+                    "last_pushed_at": r.last_pushed_at,
+                    "commits_last_30d": r.commits_last_30d,
                 }
                 for r in github.repos[:20]
             ],
@@ -150,6 +163,27 @@ async def synthesize_graph(
             "saved_shows": [{"name": s.name, "publisher": s.publisher, "url": s.url, "description": s.description} for s in spotify.saved_shows],
             "saved_audiobooks": [{"name": a.name, "author": a.author, "url": a.url} for a in spotify.saved_audiobooks],
             "recent_albums": [{"name": a.name, "artist": a.artist, "url": a.url} for a in spotify.recent_albums],
+            "artist_play_counts": spotify.artist_play_counts,
+            "artist_last_played": spotify.artist_last_played,
+            "playlists": [
+                {
+                    "id": pl.id,
+                    "name": pl.name,
+                    "track_count": pl.track_count,
+                    "url": pl.url,
+                    "top_genres": pl.top_genres,
+                    "genre_distribution": {
+                        g: c for g, c in sorted(
+                            pl.genre_distribution.items(), key=lambda x: x[1], reverse=True
+                        )[:20]
+                    },
+                    "recently_added": [
+                        {"track": t.name, "artist": t.artist, "added_at": t.added_at, "url": t.url}
+                        for t in pl.recently_added
+                    ],
+                }
+                for pl in spotify.playlists
+            ],
         },
         "steam": {
             "most_played": [{"name": g.name, "hours": g.hours_played, "url": g.store_url} for g in steam.most_played[:5]],

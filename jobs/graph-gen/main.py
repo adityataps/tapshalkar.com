@@ -62,6 +62,7 @@ async def run():
             client_id=os.environ["SPOTIFY_CLIENT_ID"],
             client_secret=os.environ["SPOTIFY_CLIENT_SECRET"],
             refresh_token=os.environ["SPOTIFY_REFRESH_TOKEN"],
+            playlist_ids=[p.strip() for p in os.environ.get("SPOTIFY_PLAYLIST_IDS", "").split(",") if p.strip()],
         ),
         fetch_steam(api_key=os.environ["STEAM_API_KEY"], user_id=os.environ["STEAM_USER_ID"]),
         fetch_apple_health(bucket_name=bucket, prefix=health_prefix),

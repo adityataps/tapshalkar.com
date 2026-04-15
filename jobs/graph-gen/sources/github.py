@@ -1,5 +1,6 @@
 import asyncio
 from dataclasses import dataclass, field
+from datetime import datetime, timezone, timedelta
 import httpx
 
 
@@ -11,6 +12,8 @@ class RepoData:
     stars: int
     url: str
     topics: list[str]
+    last_pushed_at: str = ""
+    commits_last_30d: int = 0
 
 
 @dataclass
@@ -23,6 +26,44 @@ async def _fetch_repo_languages(client: httpx.AsyncClient, username: str, repo_n
     r = await client.get(f"https://api.github.com/repos/{username}/{repo_name}/languages")
     r.raise_for_status()
     return r.json()
+
+
+async def _fetch_commit_stats(client: httpx.AsyncClient, username: str) -> dict[str, int]:
+    """One GraphQL call → per-repo commit counts for the last 30 days."""
+    to_dt = datetime.now(timezone.utc)
+    from_dt = to_dt - timedelta(days=30)
+    query = """
+    query($login: String!, $from: DateTime!, $to: DateTime!) {
+      user(login: $login) {
+        contributionsCollection(from: $from, to: $to) {
+          commitContributionsByRepository(maxRepositories: 30) {
+            contributions { totalCount }
+            repository { name }
+          }
+        }
+      }
+    }
+    """
+    r = await client.post(
+        "https://api.github.com/graphql",
+        json={
+            "query": query,
+            "variables": {
+                "login": username,
+                "from": from_dt.isoformat(),
+                "to": to_dt.isoformat(),
+            },
+        },
+    )
+    r.raise_for_status()
+    contribs = (
+        r.json()
+        .get("data", {})
+        .get("user", {})
+        .get("contributionsCollection", {})
+        .get("commitContributionsByRepository", [])
+    )
+    return {c["repository"]["name"]: c["contributions"]["totalCount"] for c in contribs}
 
 
 async def fetch_github(username: str, token: str) -> GitHubData:
@@ -40,7 +81,10 @@ async def fetch_github(username: str, token: str) -> GitHubData:
             _fetch_repo_languages(client, username, repo["name"])
             for repo in raw_repos
         ]
-        all_languages = await asyncio.gather(*language_tasks)
+        all_languages, commit_stats = await asyncio.gather(
+            asyncio.gather(*language_tasks),
+            _fetch_commit_stats(client, username),
+        )
 
     repos = [
         RepoData(
@@ -50,6 +94,8 @@ async def fetch_github(username: str, token: str) -> GitHubData:
             stars=raw.get("stargazers_count", 0),
             url=raw.get("html_url", ""),
             topics=raw.get("topics", []),
+            last_pushed_at=raw.get("pushed_at", ""),
+            commits_last_30d=commit_stats.get(raw["name"], 0),
         )
         for raw, langs in zip(raw_repos, all_languages)
     ]
