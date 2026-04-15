@@ -49,7 +49,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div>
       <section className="mx-auto max-w-6xl px-6 pt-14 pb-8">
 
         {/* Split hero */}
