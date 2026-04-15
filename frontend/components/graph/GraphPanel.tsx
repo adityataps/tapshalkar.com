@@ -2,7 +2,6 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
-import DEV_GRAPH from "@/lib/devGraph";
 import { ForceGraphMethods } from "react-force-graph-2d";
 import type { GraphData, GraphNode } from "./types";
 import { NODE_COLORS } from "./types";
@@ -46,8 +45,8 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
     const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
     fetch(`${apiUrl}/api/graph`)
       .then((r) => { if (!r.ok) return null; return r.json(); })
-      .then((d) => { setData(d ?? (process.env.NODE_ENV === "development" ? DEV_GRAPH : EMPTY_GRAPH)); })
-      .catch(() => { if (process.env.NODE_ENV === "development") setData(DEV_GRAPH); })
+      .then((d) => { if (d) setData(d); })
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 

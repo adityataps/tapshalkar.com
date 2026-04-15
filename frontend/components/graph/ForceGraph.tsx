@@ -149,8 +149,6 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
           nodeCanvasObjectMode={() => "replace"}
           nodeRelSize={5}
           warmupTicks={300}
-          d3VelocityDecay={0.6}
-          d3AlphaDecay={0.04}
           linkColor={linkColor}
           linkWidth={linkWidth}
           onNodeClick={onNodeClick as ((node: object) => void) | undefined}
