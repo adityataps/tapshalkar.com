@@ -41,9 +41,9 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
     if (dimensions.width === 0) return;
     const fg = resolvedRef.current;
     if (!fg) return;
-    fg.d3Force("x", forceX(0).strength(0.04));
-    fg.d3Force("y", forceY(0).strength(0.04));
-    fg.d3Force("charge")?.strength(-60);
+    fg.d3Force("x", forceX(0).strength(0.1));
+    fg.d3Force("y", forceY(0).strength(0.1));
+    fg.d3Force("charge")?.strength(-80);
     fg.d3Force("collide", forceCollide(14));
   }, [dimensions.width]); // eslint-disable-line react-hooks/exhaustive-deps
 
