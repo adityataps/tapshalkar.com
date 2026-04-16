@@ -61,7 +61,7 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
     // Wait for the simulation to stabilize slightly before zooming to fit
     // This ensures that the nodes have their initial positions from warmupTicks
     const timeoutId = setTimeout(() => {
-      fg.zoomToFit(400, 50);
+      fg.zoomToFit(400, 20);
     }, 100);
 
     return () => clearTimeout(timeoutId);
