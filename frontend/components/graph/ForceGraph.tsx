@@ -52,6 +52,21 @@ export default function ForceGraph({ data, activeNodeIds = [], selectedNodeIds =
     links: data.edges.map((e) => ({ source: e.source, target: e.target, type: e.type, weight: e.weight })),
   }), [data.nodes, data.edges]);
 
+  // Zoom to fit on data change
+  useEffect(() => {
+    if (dimensions.width === 0) return;
+    const fg = resolvedRef.current;
+    if (!fg) return;
+
+    // Wait for the simulation to stabilize slightly before zooming to fit
+    // This ensures that the nodes have their initial positions from warmupTicks
+    const timeoutId = setTimeout(() => {
+      fg.zoomToFit(400, 50);
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [graphData, dimensions.width]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const activeSet = useMemo(() => new Set(activeNodeIds), [activeNodeIds]);
   const selectedSet = useMemo(() => new Set(selectedNodeIds), [selectedNodeIds]);
   const isPeek = useCallback((id: string) => id === peekNodeId, [peekNodeId]);
