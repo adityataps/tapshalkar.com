@@ -97,6 +97,7 @@ export default function ChatPanel({
         return;
       }
 
+      clearTimeout(timeoutId);
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let accumulated = "";
