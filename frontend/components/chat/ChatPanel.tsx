@@ -148,6 +148,7 @@ export default function ChatPanel({
   };
 
   const showSuggestions = messages.length === 0 && !isStreaming;
+  const isWaiting = isStreaming && !streamingContent;
 
   return (
     <div className="flex flex-col gap-4">
@@ -175,6 +176,9 @@ export default function ChatPanel({
           {messages.map((m, i) => (
             <ChatMessage key={i} role={m.role} content={m.content} contextNodes={m.contextNodes} />
           ))}
+          {isWaiting && (
+            <ChatMessage role="assistant" content="thinking..." isStreaming />
+          )}
           {isStreaming && streamingContent && (
             <ChatMessage role="assistant" content={streamingContent} isStreaming />
           )}
