@@ -77,11 +77,15 @@ export default function ChatPanel({
       { role: "user", content: text + contextSuffix },
     ];
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30_000);
+
     try {
       const response = await fetch(`${apiUrl}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: apiMessages }),
+        signal: controller.signal,
       });
 
       if (!response.ok || !response.body) {
@@ -125,12 +129,19 @@ export default function ChatPanel({
       if (accumulated) {
         setMessages([...uiMessages, { role: "assistant", content: accumulated }]);
       }
-    } catch {
+    } catch (err) {
+      const isTimeout = err instanceof Error && err.name === "AbortError";
       setMessages([
         ...uiMessages,
-        { role: "assistant", content: "Something went wrong. Please try again." },
+        {
+          role: "assistant",
+          content: isTimeout
+            ? "Request timed out. The backend may be starting up — please try again."
+            : "Something went wrong. Please try again.",
+        },
       ]);
     } finally {
+      clearTimeout(timeoutId);
       setIsStreaming(false);
       setStreamingContent("");
     }
