@@ -77,11 +77,15 @@ export default function ChatPanel({
       { role: "user", content: text + contextSuffix },
     ];
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30_000);
+
     try {
       const response = await fetch(`${apiUrl}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: apiMessages }),
+        signal: controller.signal,
       });
 
       if (!response.ok || !response.body) {
@@ -93,6 +97,7 @@ export default function ChatPanel({
         return;
       }
 
+      clearTimeout(timeoutId);
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let accumulated = "";
@@ -125,18 +130,26 @@ export default function ChatPanel({
       if (accumulated) {
         setMessages([...uiMessages, { role: "assistant", content: accumulated }]);
       }
-    } catch {
+    } catch (err) {
+      const isTimeout = err instanceof Error && err.name === "AbortError";
       setMessages([
         ...uiMessages,
-        { role: "assistant", content: "Something went wrong. Please try again." },
+        {
+          role: "assistant",
+          content: isTimeout
+            ? "Request timed out. The backend may be starting up — please try again."
+            : "Something went wrong. Please try again.",
+        },
       ]);
     } finally {
+      clearTimeout(timeoutId);
       setIsStreaming(false);
       setStreamingContent("");
     }
   };
 
   const showSuggestions = messages.length === 0 && !isStreaming;
+  const isWaiting = isStreaming && !streamingContent;
 
   return (
     <div className="flex flex-col gap-4">
@@ -164,6 +177,9 @@ export default function ChatPanel({
           {messages.map((m, i) => (
             <ChatMessage key={i} role={m.role} content={m.content} contextNodes={m.contextNodes} />
           ))}
+          {isWaiting && (
+            <ChatMessage role="assistant" content="thinking..." isStreaming />
+          )}
           {isStreaming && streamingContent && (
             <ChatMessage role="assistant" content={streamingContent} isStreaming />
           )}
