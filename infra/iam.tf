@@ -105,3 +105,36 @@ resource "google_project_iam_member" "github_cloudfunctions_admin" {
   role    = "roles/cloudfunctions.admin"
   member  = "serviceAccount:${google_service_account.github_actions.email}"
 }
+
+# Cloud Functions Gen2 uses the Compute Engine default SA as the Cloud Build
+# worker identity, not @cloudbuild.gserviceaccount.com.
+
+# Compute Engine default SA: write build logs to Cloud Logging
+resource "google_project_iam_member" "compute_sa_log_writer" {
+  project = var.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+# Compute Engine default SA: read source from GCS during Cloud Build
+resource "google_project_iam_member" "compute_sa_storage_viewer" {
+  project = var.project_id
+  role    = "roles/storage.objectViewer"
+  member  = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+# Compute Engine default SA: push/pull images from the gcf-artifacts repo
+# that Cloud Functions Gen2 auto-creates for build cache and final images.
+resource "google_project_iam_member" "compute_sa_ar_writer" {
+  project = var.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
+
+# Compute Engine default SA: act as resume-parser SA during Gen2 function
+# build/deploy so Cloud Build can configure the backing Cloud Run service.
+resource "google_service_account_iam_member" "cloudbuild_resume_parser_sa_user" {
+  service_account_id = google_service_account.resume_parser.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${data.google_project.project.number}-compute@developer.gserviceaccount.com"
+}
