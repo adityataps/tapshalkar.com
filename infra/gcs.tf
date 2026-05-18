@@ -28,7 +28,8 @@ resource "google_storage_bucket" "static_site" {
 }
 
 resource "google_storage_bucket_iam_member" "public_read" {
-  bucket = google_storage_bucket.static_site.name
-  role   = "roles/storage.objectViewer"
-  member = "allUsers"
+  bucket     = google_storage_bucket.static_site.name
+  role       = "roles/storage.objectViewer"
+  member     = "allUsers"
+  depends_on = [google_org_policy_policy.allow_public_iam]
 }

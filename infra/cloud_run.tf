@@ -72,9 +72,10 @@ resource "google_cloud_run_v2_service" "backend" {
 
 # Allow unauthenticated access (public API)
 resource "google_cloud_run_v2_service_iam_member" "backend_public" {
-  project  = google_cloud_run_v2_service.backend.project
-  location = google_cloud_run_v2_service.backend.location
-  name     = google_cloud_run_v2_service.backend.name
-  role     = "roles/run.invoker"
-  member   = "allUsers"
+  project    = google_cloud_run_v2_service.backend.project
+  location   = google_cloud_run_v2_service.backend.location
+  name       = google_cloud_run_v2_service.backend.name
+  role       = "roles/run.invoker"
+  member     = "allUsers"
+  depends_on = [google_org_policy_policy.allow_public_iam]
 }

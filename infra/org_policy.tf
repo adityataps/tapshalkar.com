@@ -1,3 +1,10 @@
-# google_project_organization_policy requires org-level orgpolicy.policyAdmin
-# which is not available on personal GCP accounts. If iam.allowedPolicyMemberDomains
-# is enforced in your org, this needs to be applied by an org admin out-of-band.
+resource "google_org_policy_policy" "allow_public_iam" {
+  name   = "projects/${var.project_id}/policies/iam.allowedPolicyMemberDomains"
+  parent = "projects/${var.project_id}"
+
+  spec {
+    rules {
+      allow_all = "TRUE"
+    }
+  }
+}
