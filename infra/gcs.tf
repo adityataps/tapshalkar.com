@@ -27,7 +27,6 @@ resource "google_storage_bucket" "static_site" {
   }
 }
 
-# Allow CDN (allUsers) to read objects
 resource "google_storage_bucket_iam_member" "public_read" {
   bucket = google_storage_bucket.static_site.name
   role   = "roles/storage.objectViewer"

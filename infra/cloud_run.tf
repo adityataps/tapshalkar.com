@@ -63,6 +63,8 @@ resource "google_cloud_run_v2_service" "backend" {
     google_secret_manager_secret_iam_member.backend_secrets
   ]
 
+  deletion_protection = false
+
   lifecycle {
     ignore_changes = [template[0].containers[0].image]
   }

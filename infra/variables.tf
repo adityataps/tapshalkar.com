@@ -53,3 +53,15 @@ variable "spotify_playlist_ids" {
   type        = string
   default     = ""
 }
+
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token with DNS edit permissions for the zone"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_token" {
+  description = "GitHub personal access token with Actions variables write permission"
+  type        = string
+  sensitive   = true
+}
