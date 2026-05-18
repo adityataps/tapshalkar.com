@@ -66,7 +66,9 @@ resource "google_cloud_run_v2_service" "backend" {
   deletion_protection = false
 
   lifecycle {
-    ignore_changes = [template[0].containers[0].image]
+    # CI/CD manages the deployed image; ignore the full template to avoid
+    # Terraform reverting it. Re-apply with -target when infra changes are needed.
+    ignore_changes = [template]
   }
 }
 
