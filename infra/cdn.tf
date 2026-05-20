@@ -80,16 +80,43 @@ resource "google_compute_url_map" "default" {
   }
 }
 
-# Managed TLS cert
-resource "google_compute_managed_ssl_certificate" "default" {
-  name = "tapshalkar-cert"
+# TLS private key — stored in Terraform state (GCS bucket access-controlled)
+resource "tls_private_key" "origin" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
 
-  managed {
-    domains = [
-      var.domain,
-      "www.${var.domain}",
-      "${var.subdomain}.${var.domain}",
-    ]
+# CSR for Cloudflare to sign
+resource "tls_cert_request" "origin" {
+  private_key_pem = tls_private_key.origin.private_key_pem
+
+  subject {
+    common_name = var.domain
+  }
+
+  dns_names = [
+    var.domain,
+    "www.${var.domain}",
+    "${var.subdomain}.${var.domain}",
+  ]
+}
+
+# Cloudflare Origin CA certificate — trusted by Cloudflare's proxy, valid 15 years
+resource "cloudflare_origin_ca_certificate" "default" {
+  csr                = tls_cert_request.origin.cert_request_pem
+  hostnames          = [var.domain, "www.${var.domain}", "${var.subdomain}.${var.domain}"]
+  request_type       = "origin-rsa"
+  requested_validity = 5475
+}
+
+# GCP self-managed cert using the Cloudflare-signed cert + key
+resource "google_compute_ssl_certificate" "cloudflare_origin" {
+  name        = "tapshalkar-cloudflare-origin-cert"
+  private_key = tls_private_key.origin.private_key_pem
+  certificate = cloudflare_origin_ca_certificate.default.certificate
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
@@ -97,7 +124,7 @@ resource "google_compute_managed_ssl_certificate" "default" {
 resource "google_compute_target_https_proxy" "default" {
   name             = "tapshalkar-https-proxy"
   url_map          = google_compute_url_map.default.id
-  ssl_certificates = [google_compute_managed_ssl_certificate.default.id]
+  ssl_certificates = [google_compute_ssl_certificate.cloudflare_origin.id]
 }
 
 # Forwarding rule (443)
