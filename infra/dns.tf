@@ -1,3 +1,4 @@
+# core-infra owns the shared zone; this project owns its website records.
 data "cloudflare_zone" "this" {
   name = var.domain
 }

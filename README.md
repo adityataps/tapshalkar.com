@@ -57,3 +57,5 @@ All deploys are triggered via GitHub Actions:
 | `deploy-job.yml` | Push to `main` touching `jobs/graph-gen/` |
 
 Infrastructure is managed with Terraform (`infra/`). Secrets are stored in Google Secret Manager and injected as environment variables at Cloud Run runtime — never in images or code.
+
+This repository owns the website's GCP resources and its Cloudflare DNS records in `infra/dns.tf`: the apex and `aditya` A records follow the project's load balancer, while `www` is a CNAME to the apex. [`core-infra`](https://github.com/adityataps/core-infra/tree/main/providers/cloudflare) owns the shared Cloudflare zone and shared domain records; it must not declare or import these website records.

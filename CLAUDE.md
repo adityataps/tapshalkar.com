@@ -35,6 +35,7 @@ infra/           # Terraform — GCS, CDN, Cloud Run, Scheduler, IAM, Artifact R
 - **Stable node IDs** — graph nodes use snake_case IDs (e.g. `skill-python`, `project-xyz`). The component accepts `activeNodeIds: string[]` for Phase 2 agent highlighting.
 - **No database in Phase 1** — all persistence is GCS (static assets + generated JSON).
 - **Secrets via Google Secret Manager** — injected as env vars into Cloud Run at runtime. Never in Docker images or code. Local dev uses `.env` (gitignored).
+- **Project owns website DNS** — `infra/dns.tf` looks up the Cloudflare zone owned by `core-infra` and manages the apex/aditya A records and www CNAME. Keep these records out of `core-infra` to avoid competing Terraform owners.
 - **Python packaging** — both `backend/` and `jobs/graph-gen/` use `pyproject.toml` + `uv.lock`. No `requirements.txt`.
 
 ## Development
