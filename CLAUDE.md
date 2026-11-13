@@ -12,7 +12,7 @@ Personal portfolio site: `tapshalkar.com`. Monorepo containing infra, frontend, 
 |---|---|
 | Frontend | Next.js (App Router, `output: 'export'`) → GCS + Cloud CDN |
 | Backend | FastAPI, Python 3.13, uv, Cloud Run (scales to zero) |
-| Graph job | Python 3.13, uv, Cloud Run Job + Cloud Scheduler (daily) |
+| Graph job | Python 3.13, uv, Cloud Run Job + Cloud Scheduler (Sundays at 06:00 UTC) |
 | Infra | Terraform (GCP) |
 | CI/CD | GitHub Actions + Workload Identity Federation |
 | LLM | Claude API (Anthropic) — graph synthesis in the scheduled job |

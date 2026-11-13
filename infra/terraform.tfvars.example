@@ -3,7 +3,7 @@ region               = "us-central1"
 domain               = "tapshalkar.com"
 github_repo          = "adityataps/tapshalkar.com"
 github_username      = "adityataps"
-graph_gen_schedule   = "0 6 * * *"
+graph_gen_schedule   = "0 6 * * 0" # Sundays at 06:00 UTC
 steam_user_id        = "1234567890"
 # Set sensitive tokens via env vars instead of committing here:
 # export TF_VAR_cloudflare_api_token="..."

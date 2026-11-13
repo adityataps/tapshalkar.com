@@ -16,7 +16,7 @@ infra/           # Terraform — GCP: GCS, CDN, Cloud Run, Scheduler, IAM, Artif
 
 **Backend** serves the knowledge graph and handles chat via a `/chat` SSE endpoint backed by Claude with tool use. Deployed to Cloud Run (scales to zero between requests).
 
-**Graph job** runs weekly via Cloud Scheduler. It fetches data from GitHub, Spotify, Steam, Trakt, and Apple Health, then calls Claude to synthesize a typed knowledge graph (`graph.json`) which is written to GCS and served via the backend.
+**Graph job** runs on Sundays at 06:00 UTC via Cloud Scheduler. It fetches data from GitHub, Spotify, Steam, Trakt, and Apple Health, then calls Claude to synthesize a typed knowledge graph (`graph.json`) which is written to GCS and served via the backend.
 
 **Chat agent** ("digital me") uses the knowledge graph as its primary knowledge base. It streams responses token-by-token and returns node IDs that get highlighted on the graph.
 
