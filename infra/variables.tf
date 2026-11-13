@@ -20,7 +20,7 @@ variable "github_repo" {
 }
 
 variable "graph_gen_schedule" {
-  description = "Cron schedule for the graph-gen job"
+  description = "UTC cron schedule for graph-gen (default: Sundays at 06:00 UTC)"
   type        = string
   default     = "0 6 * * 0"
 }

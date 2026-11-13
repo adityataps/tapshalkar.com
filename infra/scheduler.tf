@@ -1,4 +1,5 @@
 resource "google_cloud_scheduler_job" "graph_gen" {
+  # Preserve the existing ID; graph_gen_schedule controls the weekly cadence.
   name      = "graph-gen-daily"
   region    = var.region
   schedule  = var.graph_gen_schedule
@@ -12,4 +13,6 @@ resource "google_cloud_scheduler_job" "graph_gen" {
       service_account_email = google_service_account.graph_gen.email
     }
   }
+  # Provision invocation access before enabling or updating the schedule.
+  depends_on = [google_cloud_run_v2_job_iam_member.graph_gen_scheduler_invoker]
 }

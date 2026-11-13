@@ -30,6 +30,15 @@ resource "google_project_iam_member" "graph_gen_gcs_writer" {
   member  = "serviceAccount:${google_service_account.graph_gen.email}"
 }
 
+# Cloud Scheduler authenticates as graph-gen SA when starting this one job.
+resource "google_cloud_run_v2_job_iam_member" "graph_gen_scheduler_invoker" {
+  project  = var.project_id
+  location = var.region
+  name     = google_cloud_run_v2_job.graph_gen.name
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${google_service_account.graph_gen.email}"
+}
+
 # GitHub Actions SA: deploy Cloud Run
 resource "google_project_iam_member" "github_run_admin" {
   project = var.project_id
