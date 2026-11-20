@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # pytest runs as a module so the project dir is importable (graph-gen
+        # tests import `sources`, `models`, ... from the package root).
+        project: [backend, jobs/graph-gen]
+    defaults:
+      run:
+        working-directory: ${{ matrix.project }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          # Keep in sync with the uv image pinned in the Dockerfiles.
+          version: "0.13.9"
+          enable-cache: true
+          cache-dependency-glob: ${{ matrix.project }}/uv.lock
+
+      - name: Check lockfile matches pyproject.toml
+        run: uv lock --check
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Test
+        run: uv run --no-sync python -m pytest -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: ""

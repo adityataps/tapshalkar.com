@@ -8,8 +8,13 @@ updates:
       npm-all:
         patterns:
           - "*"
+    ignore:
+      # eslint-plugin-react (via eslint-config-next) doesn't support ESLint 10 yet.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
 
-  - package-ecosystem: "pip"
+  # "uv" (not "pip") so Dependabot updates uv.lock alongside pyproject.toml.
+  - package-ecosystem: "uv"
     directory: "/backend"
     schedule:
       interval: "weekly"
@@ -18,7 +23,7 @@ updates:
         patterns:
           - "*"
 
-  - package-ecosystem: "pip"
+  - package-ecosystem: "uv"
     directory: "/jobs/graph-gen"
     schedule:
       interval: "weekly"

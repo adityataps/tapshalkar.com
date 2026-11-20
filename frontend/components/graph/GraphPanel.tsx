@@ -26,16 +26,11 @@ export default function GraphPanel({ activeNodeIds = [], agentZoomTrigger, selec
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
   const [chatOpen, setChatOpen] = useState(true);
-  const [isTouch, setIsTouch] = useState(false);
   const [peekNode, setPeekNode] = useState<GraphNode | null>(null);
   const graphRef = useRef<ForceGraphMethods | undefined>(undefined);
 
-  useEffect(() => {
-    setIsTouch(window.matchMedia("(pointer: coarse)").matches);
-  }, []);
-
   const handleNodeClick = (node: GraphNode) => {
-    if (isTouch) {
+    if (window.matchMedia("(pointer: coarse)").matches) {
       setPeekNode(node);
     } else {
       onNodeSelect?.(node);
