@@ -21,7 +21,7 @@ terraform {
   }
 
   backend "gcs" {
-    bucket = "adits-gcp-tfstate"
+    bucket = "tapshalkar-com-tfstate"
     prefix = "terraform/state"
   }
 }
