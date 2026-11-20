@@ -16,83 +16,96 @@ SAMPLE_GRAPH = {
 }
 
 
-def test_search_graph_finds_by_label():
-    nodes, ids, edges = search_graph("python", SAMPLE_GRAPH)
-    assert any(n["id"] == "skill-python" for n in nodes)
+# voyage_api_key="" exercises the substring fallback, so no embedding calls are made.
+
+@pytest.mark.anyio
+async def test_search_graph_finds_by_label():
+    seeds, _neighbors, ids, _edges = await search_graph("python", SAMPLE_GRAPH, voyage_api_key="")
+    assert any(n["id"] == "skill-python" for n in seeds)
     assert "skill-python" in ids
 
 
-def test_search_graph_returns_connected_edges():
-    nodes, ids, edges = search_graph("portfolio", SAMPLE_GRAPH)
-    assert "project-portfolio" in ids
-    # edges where BOTH endpoints are in matched ids are not returned here
-    # since skill nodes aren't matched, but the function returns edges
-    # between matched nodes only
+@pytest.mark.anyio
+async def test_search_graph_returns_connected_edges():
+    seeds, neighbors, _ids, edges = await search_graph("portfolio", SAMPLE_GRAPH, voyage_api_key="")
+    assert [n["id"] for n in seeds] == ["project-portfolio"]
+    # Both skills are 1 hop from the portfolio, ordered by edge weight
+    assert [n["id"] for n in neighbors] == ["skill-python", "skill-fastapi"]
+    assert len(edges) == 2
 
 
-def test_search_graph_case_insensitive():
-    nodes, ids, edges = search_graph("FASTAPI", SAMPLE_GRAPH)
+@pytest.mark.anyio
+async def test_search_graph_case_insensitive():
+    _seeds, _neighbors, ids, _edges = await search_graph("FASTAPI", SAMPLE_GRAPH, voyage_api_key="")
     assert "skill-fastapi" in ids
 
 
-def test_search_graph_returns_empty_on_no_match():
-    nodes, ids, edges = search_graph("nonexistent-xyz", SAMPLE_GRAPH)
-    assert nodes == []
+@pytest.mark.anyio
+async def test_search_graph_returns_empty_on_no_match():
+    seeds, neighbors, ids, edges = await search_graph("nonexistent-xyz", SAMPLE_GRAPH, voyage_api_key="")
+    assert seeds == []
+    assert neighbors == []
     assert ids == []
     assert edges == []
 
 
-def test_search_graph_caps_at_ten_results():
+@pytest.mark.anyio
+async def test_search_graph_caps_seed_results():
     big_graph = {
         "nodes": [{"id": f"skill-{i}", "type": "skill", "label": f"skill {i}", "description": "", "metadata": {}} for i in range(20)],
         "edges": []
     }
-    nodes, ids, edges = search_graph("skill", big_graph)
-    assert len(nodes) <= 10
+    seeds, _neighbors, _ids, _edges = await search_graph("skill", big_graph, voyage_api_key="")
+    assert len(seeds) == 5
 
 
 from app.core.chat import run_chat_stream
 
 
+def _block(type_, **attrs):
+    block = MagicMock()
+    block.type = type_
+    for k, v in attrs.items():
+        setattr(block, k, v)
+    return block
+
+
+class FakeStream:
+    """Stands in for the async context manager returned by client.messages.stream()."""
+
+    def __init__(self, content, texts=()):
+        self._message = MagicMock(content=content)
+        self._texts = texts
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *exc):
+        return False
+
+    @property
+    async def text_stream(self):
+        for t in self._texts:
+            yield t
+
+    async def get_final_message(self):
+        return self._message
+
+
 @pytest.mark.anyio
 async def test_run_chat_stream_emits_text_and_done():
-    """Verify SSE events include text deltas and a done event with activeNodeIds."""
-
-    async def fake_stream():
-        # Simulate: one search_knowledge_graph call then a text response
-        tool_block = MagicMock()
-        tool_block.type = "tool_use"
-        tool_block.name = "search_knowledge_graph"
-        tool_block.id = "tu_1"
-        tool_block.input = {"query": "python"}
-
-        text_block = MagicMock()
-        text_block.type = "text"
-        text_block.text = "I primarily use Python."
-
-        first_message = MagicMock()
-        first_message.content = [tool_block]
-        first_message.stop_reason = "tool_use"
-
-        second_message = MagicMock()
-        second_message.content = [text_block]
-        second_message.stop_reason = "end_turn"
-
-        return [first_message, second_message]
-
-    messages = [{"role": "user", "content": "what languages do you use?"}]
-    call_count = 0
-
-    async def fake_create(**kwargs):
-        nonlocal call_count
-        responses = await fake_stream()
-        result = responses[call_count]
-        call_count += 1
-        return result
+    """Verify SSE events include text deltas and a done event with the cited node IDs."""
+    search = _block("tool_use", name="search_knowledge_graph", id="tu_1", input={"query": "python"})
+    text = _block("text", text="I primarily use Python.")
+    cite = _block("tool_use", name="cite_nodes", id="tu_2", input={"node_ids": ["skill-python"]})
 
     mock_client = MagicMock()
-    mock_client.messages.create = fake_create
+    mock_client.messages.stream = MagicMock(side_effect=[
+        FakeStream([search]),
+        FakeStream([text, cite], texts=["I primarily use Python."]),
+    ])
 
+    messages = [{"role": "user", "content": "what languages do you use?"}]
     events = []
     with patch("app.core.chat.anthropic.AsyncAnthropic", return_value=mock_client):
         async for chunk in run_chat_stream(
@@ -100,6 +113,7 @@ async def test_run_chat_stream_emits_text_and_done():
             graph=SAMPLE_GRAPH,
             bio="I love Python.",
             currently={},
+            resume="",
             model_armor_template="",
             api_key="test-key",
         ):
@@ -107,8 +121,7 @@ async def test_run_chat_stream_emits_text_and_done():
 
     types = [e["type"] for e in events]
     assert "text" in types
-    assert events[-1]["type"] == "done"
-    assert "skill-python" in events[-1]["activeNodeIds"]
+    assert events[-1] == {"type": "done", "activeNodeIds": ["skill-python"]}
 
 
 @pytest.mark.anyio
@@ -123,6 +136,7 @@ async def test_run_chat_stream_blocked_by_model_armor():
             graph={},
             bio="",
             currently={},
+            resume="",
             model_armor_template="projects/p/locations/r/templates/t",
             api_key="test-key",
         ):
@@ -144,6 +158,7 @@ def mock_app_state():
     app.state.graph = {"nodes": [], "edges": []}
     app.state.bio = "test bio"
     app.state.currently = {}
+    app.state.resume = ""
 
 
 @pytest.mark.anyio

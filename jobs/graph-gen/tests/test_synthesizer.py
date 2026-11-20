@@ -23,8 +23,8 @@ SAMPLE_SPOTIFY = SpotifyData(
     recent_albums=[RecentAlbum(name="DAMN.", artist="Kendrick Lamar", url="https://open.spotify.com/album/damn1")],
 )
 SAMPLE_STEAM = SteamData(
-    most_played=[SteamGame(name="Counter-Strike 2", app_id=730, hours_played=70, store_url="https://store.steampowered.com/app/730")],
-    recently_played=[SteamGame(name="Counter-Strike 2", app_id=730, hours_played=70, store_url="https://store.steampowered.com/app/730")],
+    most_played=[SteamGame(name="Counter-Strike 2", app_id=730, hours_played=70, hours_last_2weeks=5, store_url="https://store.steampowered.com/app/730")],
+    recently_played=[SteamGame(name="Counter-Strike 2", app_id=730, hours_played=70, hours_last_2weeks=5, store_url="https://store.steampowered.com/app/730")],
 )
 SAMPLE_TRAKT = TraktData(history=[], watchlist=[], watching=None)
 SAMPLE_HEALTH = HealthSummary()

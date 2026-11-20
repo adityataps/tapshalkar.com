@@ -17,6 +17,18 @@ REPOS_RESPONSE = [
 
 LANGUAGES_RESPONSE = {"Python": 8000, "TypeScript": 2000}
 
+COMMIT_STATS_RESPONSE = {
+    "data": {
+        "user": {
+            "contributionsCollection": {
+                "commitContributionsByRepository": [
+                    {"repository": {"name": "cool-project"}, "contributions": {"totalCount": 7}},
+                ]
+            }
+        }
+    }
+}
+
 
 @pytest.mark.anyio
 async def test_fetch_github_returns_repos():
@@ -27,6 +39,9 @@ async def test_fetch_github_returns_repos():
         respx.get("https://api.github.com/repos/adityataps/cool-project/languages").mock(
             return_value=httpx.Response(200, json=LANGUAGES_RESPONSE)
         )
+        respx.post("https://api.github.com/graphql").mock(
+            return_value=httpx.Response(200, json=COMMIT_STATS_RESPONSE)
+        )
 
         data = await fetch_github(username="adityataps", token="test-token")
 
@@ -34,3 +49,4 @@ async def test_fetch_github_returns_repos():
     assert len(data.repos) == 1
     assert data.repos[0].name == "cool-project"
     assert "Python" in data.repos[0].languages
+    assert data.repos[0].commits_last_30d == 7

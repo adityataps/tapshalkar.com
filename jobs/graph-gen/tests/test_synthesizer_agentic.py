@@ -20,7 +20,7 @@ SAMPLE_SPOTIFY = SpotifyData(
     recently_played=[],
 )
 SAMPLE_STEAM = SteamData(
-    most_played=[SteamGame(name="Elden Ring", app_id=1245620, hours_played=47, store_url="https://store.steampowered.com/app/1245620")],
+    most_played=[SteamGame(name="Elden Ring", app_id=1245620, hours_played=47, hours_last_2weeks=0, store_url="https://store.steampowered.com/app/1245620")],
     recently_played=[],
 )
 SAMPLE_TRAKT = TraktData(
