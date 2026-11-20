@@ -1,4 +1,4 @@
-State bucket: gs://adits-gcp-tfstate
-Project: adits-gcp
-Region: us-central1
-Created: manually via gcloud (one-time bootstrap)
+State bucket: gs://tapshalkar-com-tfstate
+Location: US
+Created: 2026-04-16, manually via gcloud (one-time bootstrap)
+Replaces: gs://adits-gcp-tfstate (adits-gcp project, deleted)
