@@ -48,7 +48,7 @@ async def test_build_currently_includes_working_on():
         recently_played=[RecentTrack(name="HUMBLE.", artist="Kendrick Lamar", played_at="2026-04-09T10:00:00Z", url="https://open.spotify.com/track/hb")],
     )
     steam = SteamData(
-        most_played=[SteamGame(name="Elden Ring", app_id=1245620, hours_played=47, store_url="https://store.steampowered.com/app/1245620")],
+        most_played=[SteamGame(name="Elden Ring", app_id=1245620, hours_played=47, hours_last_2weeks=0, store_url="https://store.steampowered.com/app/1245620")],
         recently_played=[],
     )
     trakt = TraktData(history=[], watchlist=[], watching=None)
